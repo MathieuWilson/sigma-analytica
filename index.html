@@ -31,35 +31,114 @@
   "@graph": [
     {
       "@type": "ProfessionalService",
-      "@id": "https://sigma-analytica.com/#org",
+      "@id": "https://sigma-analytica.com/#organization",
       "name": "Sigma Analytica",
+      "alternateName": "Sigma Analytica EU",
       "url": "https://sigma-analytica.com/",
       "logo": "https://sigma-analytica.com/og-image.png",
       "image": "https://sigma-analytica.com/og-image.png",
-      "description": "Independent specialist delivering automation, dashboards and AI for brokerage, logistics, maritime and hospitality teams.",
-      "areaServed": ["Europe", "Cyprus", "European Union", "United Kingdom", "Australia", "New Zealand", "United States"],
-      "address": {
-        "@type": "PostalAddress",
-        "addressCountry": "CY"
+      "description": "AI automation, data visualization and integrations for brokerage, logistics, maritime and hospitality. Independent specialist, fixed-fee, EU timezone. Based in Larnaca, Cyprus and Sydney, Australia.",
+      "priceRange": "€€€",
+      "founder": {
+        "@type": "Person",
+        "name": "Mathieu Wilson",
+        "jobTitle": "Founder",
+        "nationality": ["AU", "CY"]
       },
-      "knowsAbout": ["Brokerage", "Logistics", "Maritime", "Hospitality", "AI Automation", "Artificial Intelligence", "AI Agents", "Agentic AI", "Large Language Models", "Retrieval Augmented Generation", "Workflow Automation", "Process Automation", "Data Visualization", "System Integration", "API Integration", "Analytics", "Predictive Analytics", "Business Intelligence", "Data Engineering", "Machine Learning"],
-      "founder": {"@id": "https://sigma-analytica.com/#person"}
-    },
-    {
-      "@type": "Person",
-      "@id": "https://sigma-analytica.com/#person",
-      "name": "Mathieu",
-      "jobTitle": "Founder",
-      "worksFor": {"@id": "https://sigma-analytica.com/#org"},
-      "address": {"@type": "PostalAddress", "addressCountry": "CY"}
+      "address": [
+        {
+          "@type": "PostalAddress",
+          "addressLocality": "Larnaca",
+          "addressRegion": "Larnaca",
+          "addressCountry": "CY"
+        },
+        {
+          "@type": "PostalAddress",
+          "addressLocality": "Sydney",
+          "addressRegion": "NSW",
+          "addressCountry": "AU"
+        }
+      ],
+      "location": [
+        {
+          "@type": "Place",
+          "name": "Sigma Analytica Cyprus",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Larnaca",
+            "addressCountry": "CY"
+          }
+        },
+        {
+          "@type": "Place",
+          "name": "Sigma Analytica Australia",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Sydney",
+            "addressRegion": "NSW",
+            "addressCountry": "AU"
+          }
+        }
+      ],
+      "areaServed": [
+        { "@type": "Country", "name": "Cyprus" },
+        { "@type": "Country", "name": "Australia" },
+        { "@type": "Country", "name": "United Kingdom" },
+        { "@type": "Country", "name": "Germany" },
+        { "@type": "Country", "name": "France" },
+        { "@type": "Country", "name": "Spain" },
+        { "@type": "Country", "name": "Italy" },
+        { "@type": "Country", "name": "Greece" },
+        { "@type": "Country", "name": "Malta" },
+        { "@type": "AdministrativeArea", "name": "European Union" }
+      ],
+      "knowsAbout": [
+        "AI automation",
+        "AI agents",
+        "Agentic AI",
+        "Workflow automation",
+        "Process automation",
+        "Data visualization",
+        "Dashboards",
+        "System integration",
+        "API integration",
+        "Business intelligence",
+        "Predictive analytics",
+        "Machine learning",
+        "LLM",
+        "Brokerage automation",
+        "Logistics automation",
+        "Maritime software",
+        "Ship management software",
+        "Hospitality analytics",
+        "Revenue management"
+      ],
+      "serviceType": [
+        "System Integrations",
+        "Business Automation",
+        "Analytics Dashboards",
+        "AI Augmentation"
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "contactType": "Sales",
+          "availableLanguage": ["English"],
+          "areaServed": ["CY", "AU", "EU", "GB"],
+          "url": "https://wa.me/35794571055"
+        }
+      ],
+      "sameAs": [
+        "https://www.linkedin.com/company/sigma-analytica/"
+      ]
     },
     {
       "@type": "WebSite",
       "@id": "https://sigma-analytica.com/#website",
       "url": "https://sigma-analytica.com/",
       "name": "Sigma Analytica",
-      "publisher": {"@id": "https://sigma-analytica.com/#org"},
-      "inLanguage": "en"
+      "publisher": { "@id": "https://sigma-analytica.com/#organization" },
+      "inLanguage": "en-GB"
     }
   ]
 }
