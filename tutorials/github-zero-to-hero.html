@@ -1,0 +1,3460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GitHub Zero to Hero — an interactive walkthrough</title>
+<meta name="description" content="An interactive walkthrough of GitHub, from zero." />
+<meta property="og:title" content="GitHub Zero to Hero" />
+<meta property="og:description" content="An interactive walkthrough of GitHub, from zero." />
+<meta property="og:image" content="https://sigma-analytica.com/og-image.png" />
+<meta property="og:url" content="https://sigma-analytica.com/tutorials/github-zero-to-hero.html" />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Quicksand:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0e0e10;
+    --bg-1: #131316;
+    --bg-2: #18181c;
+    --bg-3: #1f1f24;
+    --bg-hover: #23232a;
+    --border: rgba(255,255,255,0.06);
+    --border-strong: rgba(255,255,255,0.10);
+    --border-focus: rgba(124,118,255,0.55);
+    --text: #e2e2e7;
+    --text-2: #9b9ba6;
+    --text-3: #5e5e6a;
+    --accent: #7c76ff;
+    --accent-2: #a39dff;
+    --accent-soft: rgba(124,118,255,0.12);
+    --accent-line: rgba(124,118,255,0.28);
+    --green: #4ade80;
+    --green-soft: rgba(74,222,128,0.10);
+    --amber: #fbbf24;
+    --amber-soft: rgba(251,191,36,0.10);
+    --red: #f87171;
+    --red-soft: rgba(248,113,113,0.10);
+    --blue: #60a5fa;
+    --blue-soft: rgba(96,165,250,0.10);
+    --pink: #f472b6;
+    --pink-soft: rgba(244,114,182,0.10);
+    --shadow: 0 8px 32px rgba(0,0,0,0.45);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.55);
+    --radius-sm: 4px;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a { color: var(--accent-2); text-decoration: none; }
+  a:hover { color: var(--accent); }
+  ::selection { background: rgba(124,118,255,0.30); color: #fff; }
+
+  .app { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; position: relative; }
+
+  .sidebar {
+    background: var(--bg-1);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh; overflow: hidden;
+  }
+
+  .sidebar-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-2);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+    transition: all 0.12s;
+  }
+  .sidebar-toggle:hover { background: var(--bg-hover); border-color: var(--accent-line); }
+  .sidebar-toggle svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+
+  .scrim {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(2px);
+    z-index: 40;
+    opacity: 0;
+    transition: opacity 0.22s ease;
+  }
+  .scrim.show { display: block; opacity: 1; }
+  .brand {
+    padding: 22px 20px 16px;
+    display: flex; flex-direction: column; gap: 14px;
+    border-bottom: 1px solid var(--border);
+    background: radial-gradient(ellipse at 30% 30%, rgba(124,118,255,0.10), transparent 70%);
+  }
+  .brand-link, .nav-logo {
+    display: block;
+    text-decoration: none;
+    color: #fff;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .brand-link:hover, .nav-logo:hover { opacity: 0.85; transform: translateY(-1px); color: #fff; }
+  .nav-logo svg { display: block; margin: 0 auto; }
+  .brand-logo {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 220px;
+    margin: 0 auto;
+    filter: drop-shadow(0 2px 12px rgba(255,255,255,0.06));
+  }
+  .brand-tagline {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    line-height: 1.2;
+    text-align: center;
+  }
+  .brand-tagline .bt-1 {
+    font-size: 12.5px;
+    color: var(--text);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .brand-tagline .bt-2 {
+    font-size: 10.5px;
+    color: var(--text-3);
+    margin-top: 3px;
+  }
+
+  /* OS selector */
+  .os-picker {
+    padding: 12px 20px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .os-picker-label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--text-3);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .os-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--bg-3);
+    padding: 2px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .os-tab {
+    background: transparent;
+    border: 0;
+    color: var(--text-2);
+    font-size: 11.5px;
+    font-family: var(--sans);
+    padding: 5px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .os-tab:hover { color: var(--text); }
+  .os-tab.active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .os-tab svg { width: 11px; height: 11px; }
+  .os-tab svg.os-icon-tux { width: 13px; height: 13px; }
+
+  .progress-card { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+  .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-2); margin-bottom: 8px; letter-spacing: 0.02em; }
+  .progress-bar { height: 4px; background: var(--bg-3); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 999px; transition: width 0.4s ease; }
+  .reset-btn {
+    margin-top: 12px;
+    width: 100%;
+    font-size: 11.5px;
+    font-family: var(--sans);
+    color: var(--text-2);
+    background: var(--bg-2);
+    border: 1px solid var(--border-strong);
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.12s ease;
+  }
+  .reset-btn:hover {
+    color: var(--text);
+    border-color: rgba(248,113,113,0.40);
+    background: var(--red-soft);
+  }
+  .reset-btn:hover .reset-ico { color: var(--red); }
+  .reset-btn .reset-ico { width: 12px; height: 12px; transition: color 0.12s; }
+  .reset-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .reset-btn:disabled:hover { color: var(--text-2); background: var(--bg-2); border-color: var(--border-strong); }
+  .reset-btn:disabled:hover .reset-ico { color: var(--text-2); }
+
+  .nav { flex: 1; overflow-y: auto; padding: 8px 10px 24px; }
+  .nav::-webkit-scrollbar { width: 6px; }
+  .nav::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 3px; }
+  .nav::-webkit-scrollbar-track { background: transparent; }
+
+  .section { margin-top: 12px; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.10em; color: var(--text-3); cursor: pointer; user-select: none; }
+  .section-head:hover { color: var(--text-2); }
+  .section-count { color: var(--text-3); font-size: 10px; font-family: var(--mono); }
+  .section-list { display: flex; flex-direction: column; gap: 1px; }
+  .section.collapsed .section-list { display: none; }
+
+  .nav-item { display: flex; align-items: center; gap: 9px; padding: 6px 10px; margin: 1px 0; border-radius: 6px; color: var(--text-2); cursor: pointer; font-size: 13px; border: 1px solid transparent; transition: background 0.12s, color 0.12s; }
+  .nav-item:hover { background: var(--bg-2); color: var(--text); }
+  .nav-item.active { background: var(--accent-soft); color: var(--text); border-color: var(--accent-line); }
+  .nav-check { width: 14px; height: 14px; border-radius: 50%; background: var(--bg-3); border: 1px solid var(--border-strong); flex-shrink: 0; display: grid; place-items: center; transition: background 0.15s; }
+  .nav-item.done .nav-check { background: var(--green); border-color: var(--green); }
+  .nav-item.done .nav-check::after { content: ""; width: 6px; height: 3px; border-left: 1.5px solid #0a0a0a; border-bottom: 1.5px solid #0a0a0a; transform: rotate(-45deg) translate(0.5px,-1px); }
+  .nav-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .main { overflow-y: auto; height: 100vh; background: var(--bg); }
+  .main::-webkit-scrollbar { width: 10px; }
+  .main::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 5px; }
+  .main::-webkit-scrollbar-track { background: transparent; }
+
+  .topbar { position: sticky; top: 0; z-index: 5; backdrop-filter: blur(12px); background: rgba(14,14,16,0.85); border-bottom: 1px solid var(--border); padding: 12px 32px; display: flex; align-items: center; gap: 16px; font-size: 12.5px; color: var(--text-2); }
+  .crumbs { display: flex; align-items: center; gap: 8px; flex: 1; }
+  .crumb-sep { color: var(--text-3); }
+  .crumb-current { color: var(--text); }
+  .topbar-shortcuts { display: flex; align-items: center; gap: 14px; color: var(--text-3); font-size: 11.5px; }
+  kbd { font-family: var(--mono); font-size: 10.5px; background: var(--bg-2); border: 1px solid var(--border-strong); padding: 1px 5px; border-radius: 4px; color: var(--text-2); }
+
+  .lesson { max-width: 780px; margin: 0 auto; padding: 40px 32px 64px; }
+  .lesson-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.10em; color: var(--accent-2); background: var(--accent-soft); padding: 4px 10px; border-radius: 999px; margin-bottom: 16px; }
+  .lesson h1 { font-size: 30px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700; margin: 0 0 10px; }
+  .lesson-meta { color: var(--text-3); font-size: 12.5px; margin-bottom: 28px; display: flex; align-items: center; gap: 14px; }
+  .lesson-meta-item { display: flex; align-items: center; gap: 6px; }
+  .lesson h2 { font-size: 19px; margin: 34px 0 10px; letter-spacing: -0.01em; font-weight: 600; }
+  .lesson h3 { font-size: 15px; margin: 24px 0 8px; color: var(--text); font-weight: 600; }
+  .lesson p { margin: 10px 0; color: #c8c8d2; }
+  .lesson p strong { color: var(--text); font-weight: 600; }
+  .lesson ul, .lesson ol { color: #c8c8d2; padding-left: 22px; }
+  .lesson li { margin: 6px 0; }
+  .lesson code:not(pre code) { font-family: var(--mono); font-size: 12.5px; background: var(--bg-2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; color: var(--accent-2); }
+
+  .callout { margin: 18px 0; padding: 14px 16px 14px 18px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-1); position: relative; }
+  .callout-head { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 12.5px; margin-bottom: 6px; color: var(--text); }
+  .callout-body { font-size: 13.5px; color: #c8c8d2; }
+  .callout-body p:first-child { margin-top: 0; }
+  .callout-body p:last-child { margin-bottom: 0; }
+  .callout.tip { border-color: var(--accent-line); background: linear-gradient(180deg, var(--accent-soft), transparent 80%); }
+  .callout.tip .callout-head { color: var(--accent-2); }
+  .callout.info { border-color: rgba(96,165,250,0.25); background: linear-gradient(180deg, var(--blue-soft), transparent 80%); }
+  .callout.info .callout-head { color: var(--blue); }
+  .callout.warn { border-color: rgba(251,191,36,0.28); background: linear-gradient(180deg, var(--amber-soft), transparent 80%); }
+  .callout.warn .callout-head { color: var(--amber); }
+  .callout.danger { border-color: rgba(248,113,113,0.28); background: linear-gradient(180deg, var(--red-soft), transparent 80%); }
+  .callout.danger .callout-head { color: var(--red); }
+
+  .terminal { margin: 20px 0 6px; background: #08080a; border: 1px solid var(--border-strong); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  .terminal-head { display: flex; align-items: center; padding: 9px 12px; background: #101013; border-bottom: 1px solid var(--border); gap: 10px; }
+  .terminal-dots { display: flex; gap: 6px; }
+  .terminal-dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .terminal-dots span:nth-child(1) { background: #ff5f57; }
+  .terminal-dots span:nth-child(2) { background: #febc2e; }
+  .terminal-dots span:nth-child(3) { background: #28c840; }
+  .terminal-title { flex: 1; text-align: center; font-size: 11.5px; color: var(--text-3); font-family: var(--mono); }
+  .terminal-controls { display: flex; gap: 4px; }
+  .term-btn { background: transparent; border: 1px solid var(--border-strong); color: var(--text-2); padding: 3px 9px; border-radius: 5px; font-size: 11px; cursor: pointer; font-family: var(--sans); display: inline-flex; align-items: center; gap: 5px; transition: all 0.12s; }
+  .term-btn:hover { background: var(--bg-2); color: var(--text); }
+  .term-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .term-btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+
+  .terminal-body { font-family: var(--mono); font-size: 12.5px; line-height: 1.65; padding: 16px 16px 18px; color: #d4d4d8; min-height: 120px; max-height: 460px; overflow-y: auto; white-space: pre-wrap; word-break: break-word; }
+  .terminal-body::-webkit-scrollbar { width: 6px; }
+  .terminal-body::-webkit-scrollbar-thumb { background: #2a2a30; border-radius: 3px; }
+  .term-line { white-space: pre-wrap; }
+  .term-prompt { color: var(--accent-2); }
+  .term-host { color: var(--green); }
+  .term-cwd { color: var(--blue); }
+  .term-cmd { color: #f4f4f5; }
+  .term-out { color: #a1a1aa; }
+  .term-out.success { color: var(--green); }
+  .term-out.warn { color: var(--amber); }
+  .term-out.err { color: var(--red); }
+  .term-out.muted { color: #6b6b75; }
+  .term-out.added { color: var(--green); }
+  .term-out.removed { color: var(--red); }
+  .term-out.hunk { color: var(--blue); }
+  .term-out.bold { color: #fff; font-weight: 600; }
+
+  .cursor { display: inline-block; width: 7px; height: 14px; background: var(--accent-2); vertical-align: text-bottom; margin-left: 1px; animation: blink 1.05s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .gh-mock { margin: 18px 0; border: 1px solid var(--border-strong); border-radius: var(--radius); overflow: hidden; background: var(--bg-1); }
+  .gh-mock-head { background: var(--bg-2); border-bottom: 1px solid var(--border); padding: 10px 14px; font-size: 12.5px; color: var(--text-2); display: flex; align-items: center; gap: 10px; }
+  .gh-mock-body { padding: 14px 16px; font-size: 13px; }
+
+  .pr-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--border); }
+  .pr-row:first-child { border-top: 0; }
+  .pr-icon { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; font-size: 11px; color: #fff; font-weight: 700; }
+  .pr-icon.open { background: var(--green); }
+  .pr-icon.merged { background: #a78bfa; }
+  .pr-icon.closed { background: var(--red); }
+  .pr-title { font-weight: 500; color: var(--text); }
+  .pr-meta { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+  .pr-content { flex: 1; min-width: 0; }
+
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; }
+  .badge.bug { background: var(--red-soft); color: var(--red); border: 1px solid rgba(248,113,113,0.30); }
+  .badge.feat { background: var(--green-soft); color: var(--green); border: 1px solid rgba(74,222,128,0.30); }
+  .badge.docs { background: var(--blue-soft); color: var(--blue); border: 1px solid rgba(96,165,250,0.30); }
+  .badge.good-first { background: var(--pink-soft); color: var(--pink); border: 1px solid rgba(244,114,182,0.30); }
+  .badge.help { background: var(--amber-soft); color: var(--amber); border: 1px solid rgba(251,191,36,0.30); }
+
+  .diagram { margin: 18px 0; padding: 22px; background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius-lg); display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; text-align: center; }
+  .diagram-col h4 { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin: 0 0 10px; font-weight: 600; }
+  .diagram-box { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 8px; margin: 6px 0; font-size: 12px; font-family: var(--mono); color: var(--text-2); }
+  .diagram-box.highlight { border-color: var(--accent-line); background: var(--accent-soft); color: var(--text); }
+  .diagram-arrow { color: var(--text-3); font-size: 18px; margin: 8px 0; }
+
+  .branch-diagram { margin: 18px 0; padding: 24px; background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius-lg); font-family: var(--mono); font-size: 12.5px; line-height: 2; color: var(--text-2); white-space: pre; overflow-x: auto; }
+  .branch-diagram .bd-main { color: var(--accent-2); }
+  .branch-diagram .bd-feat { color: var(--green); }
+  .branch-diagram .bd-fix { color: var(--amber); }
+  .branch-diagram .bd-label { color: var(--text); font-weight: 600; }
+
+  .takeaways { margin: 28px 0 0; padding: 18px 20px; background: linear-gradient(180deg, var(--accent-soft), transparent); border: 1px solid var(--accent-line); border-radius: var(--radius-lg); }
+  .takeaways h3 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-2); font-weight: 600; }
+  .takeaways ul { margin: 6px 0 0; padding-left: 20px; }
+  .takeaways li { color: var(--text); }
+
+  .lesson-foot { margin-top: 36px; display: flex; gap: 12px; border-top: 1px solid var(--border); padding-top: 22px; }
+  .foot-btn { flex: 1; background: var(--bg-1); border: 1px solid var(--border); color: var(--text); padding: 14px 16px; border-radius: var(--radius); cursor: pointer; text-align: left; display: flex; flex-direction: column; transition: all 0.12s; font-family: var(--sans); }
+  .foot-btn:hover:not(:disabled) { border-color: var(--accent-line); background: var(--bg-2); }
+  .foot-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .foot-btn .foot-dir { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; }
+  .foot-btn .foot-title { font-weight: 500; margin-top: 4px; color: var(--text); }
+  .foot-btn.next { text-align: right; }
+  .complete-btn { margin-top: 18px; display: inline-flex; align-items: center; gap: 8px; background: var(--bg-2); border: 1px solid var(--border-strong); color: var(--text); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.15s; font-family: var(--sans); }
+  .complete-btn:hover { border-color: var(--accent-line); background: var(--accent-soft); color: var(--text); }
+  .complete-btn.done { background: var(--green-soft); color: var(--green); border-color: rgba(74,222,128,0.30); }
+
+  .ico { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .ico-lg { width: 16px; height: 16px; }
+  .ico-sm { width: 12px; height: 12px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cursor { animation: none; }
+    * { transition: none !important; }
+  }
+
+  /* ============================================================
+     MOBILE / RESPONSIVE
+     ============================================================ */
+  @media (max-width: 880px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 300px;
+      max-width: 86vw;
+      z-index: 50;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      box-shadow: 12px 0 40px rgba(0,0,0,0.55);
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-toggle { display: inline-flex; }
+    .topbar { padding: 10px 16px; gap: 12px; }
+    .topbar-shortcuts { display: none; }
+    .crumbs { font-size: 12px; gap: 6px; }
+    .crumbs span:not(:last-child):not(.crumb-current):not(.crumb-sep) { display: none; }
+    .crumbs span.crumb-sep:not(:last-of-type) { display: none; }
+    .lesson { padding: 24px 18px 56px; }
+    .lesson h1 { font-size: 24px; }
+    .lesson h2 { font-size: 17px; margin-top: 28px; }
+    .lesson p, .lesson li { font-size: 14px; }
+    .lesson-meta { font-size: 11.5px; gap: 10px; }
+    .diagram { grid-template-columns: 1fr; padding: 16px; gap: 8px; }
+    .diagram-arrow { display: none; }
+    .branch-diagram { font-size: 11px; padding: 14px; }
+    .lesson-foot { flex-direction: column; gap: 8px; }
+    .foot-btn { padding: 12px 14px; }
+    .terminal-body { font-size: 12px; padding: 14px 12px; max-height: 380px; }
+    .terminal-controls { gap: 3px; }
+    .term-btn { padding: 3px 7px; font-size: 10.5px; }
+    .term-btn svg { display: none; }
+    .gh-mock-body { padding: 12px; }
+    .pr-row { padding: 8px 10px; gap: 8px; }
+  }
+
+  @media (max-width: 480px) {
+    body { font-size: 13.5px; }
+    .lesson { padding: 18px 14px 44px; }
+    .lesson h1 { font-size: 21px; line-height: 1.25; }
+    .lesson h2 { font-size: 16px; }
+    .terminal-body { font-size: 11px; padding: 12px 10px; }
+    .terminal-head { padding: 7px 10px; }
+    .terminal-title { font-size: 10.5px; }
+    .topbar { padding: 8px 12px; }
+    .crumbs { font-size: 11.5px; }
+    .branch-diagram { font-size: 10px; padding: 12px; line-height: 1.7; }
+    /* Make tables in lessons scroll horizontally on tiny screens */
+    .lesson table { display: block; overflow-x: auto; white-space: nowrap; }
+  }
+
+  /* Larger touch target for terminal Play button on touch devices */
+  @media (hover: none) {
+    .term-btn { padding: 5px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+        <a href="https://sigma-analytica.com/" class="nav-logo" target="_blank" rel="noopener noreferrer" title="Sigma Analytica — Automation & Intelligence for Brokerage, Logistics, Maritime & Hospitality">
+            <svg style="height:48px;width:auto;display:block;" aria-label="Sigma Analytica" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+                <g id="layer1" style="display:inline">
+                    <!-- Greek capital sigma (Σ) as an SVG path so it renders identically across
+                 all devices, regardless of whether the Symbol font is installed.
+                 Glyph extracted from STIX General (U+03A3), a free, open-source font
+                 designed by the STI Pub consortium as a replacement for the proprietary
+                 Symbol font, with matching classical proportions and stroke contrast. -->
+                    <g transform="translate(12.959003,30.032930) scale(0.03005163,-0.03024207)" style="opacity:0.98;fill:currentColor;fill-opacity:1;fill-rule:evenodd;stroke:none;">
+                        <path d="M600 204H577C562 128 535 95 458 95H148L385 367L173 624H381C469 624 516 603 531 501H556V662H30V647L297 324L30 15V0H572Z"></path>
+                    </g>
+                </g>
+                <g id="g55" style="display:inline">
+                    <text xml:space="preserve" style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:13.6568px;font-family:Quicksand;-inkscape-font-specification:'Quicksand Medium';letter-spacing:0.00529167px;word-spacing:0.00264583px;writing-mode:lr-tb;direction:ltr;white-space:pre;inline-size:96.6506;display:inline;fill:currentColor;fill-opacity:1;stroke:none;stroke-width:0;stroke-linejoin:miter;stroke-miterlimit:4.3;stroke-dasharray:none;stroke-opacity:1;paint-order:normal" x="24.436708" y="53.008862" id="text55" transform="matrix(1.0876277,0,0,0.99309442,17.998881,-32.871331)"><tspan x="24.436708" y="53.008862" id="tspan6"><tspan dx="0 -0.0026460381 0.0026462381 -0.0026457997 0.0026452844 -0.0026446076 0.0026452844 -0.0026455612 0.0026433771" style="stroke-linecap:square;paint-order:fill markers stroke" id="tspan5">S I G M A</tspan></tspan></text>
+                </g>
+                <g id="g11" transform="translate(0.33229544,8.5732222)" style="display:inline">
+                    <text xml:space="preserve" style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:9.73269px;line-height:0;font-family:'Copperplate Gothic Light';-inkscape-font-specification:'Copperplate Gothic Light, ';letter-spacing:0px;word-spacing:0.00264583px;writing-mode:lr-tb;direction:ltr;white-space:pre;inline-size:96.6506;display:inline;fill:currentColor;fill-opacity:1;stroke:none;stroke-width:0;stroke-dasharray:none;stroke-opacity:0.74744" x="24.436708" y="53.008862" id="text11" transform="matrix(0.82800279,0,0,0.73242479,24.152675,-17.352052)"><tspan x="24.436708" y="53.008862" id="tspan8"><tspan dx="0 -0.0026458299 0.0026459694 -0.0026467836 0.0026464462 -0.0026463068 0.0026464462 -0.0026439226 0.0026445389 -0.0026448763 0.0026445389 -0.0026453531 0.0026445389 -0.0026453531 0.0026445389 -0.0026434457 0.0026445389" style="font-weight:500;font-family:Quicksand;-inkscape-font-specification:'Quicksand Medium';stroke-opacity:0.658703" id="tspan7">A N A L Y T I C A</tspan></tspan></text>
+                </g>
+            </svg>
+        </a>
+      <div class="brand-tagline">
+        <div class="bt-1">GitHub Zero to Hero</div>
+        <div class="bt-2">An interactive walkthrough</div>
+      </div>
+    </div>
+    <div class="os-picker">
+      <span class="os-picker-label">Show commands for</span>
+      <div class="os-tabs" role="tablist">
+        <button class="os-tab" data-os="mac" role="tab">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/></svg>
+          macOS
+        </button>
+        <button class="os-tab" data-os="windows" role="tab">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 12V6.75l6-1.32v6.48L3 12m17-9v8.75l-10 .15V5.21L20 3M3 13l6 .09v6.81l-6-1.15V13m17 .25V22l-10-1.91V13.1l10 .15z"/></svg>
+          Windows
+        </button>
+        <button class="os-tab" data-os="linux" role="tab">
+          <svg class="os-icon-tux" viewBox="0 0 448 448" fill="currentColor" aria-hidden="true"><path transform="translate(222,57)" d="M0,0 L11,0 L27,4 L38,11 L45,19 L53,35 L57,51 L59,76 L61,97 L65,109 L75,124 L87,141 L99,160 L110,179 L115,191 L117,202 L117,218 L115,234 L120,242 L123,259 L127,265 L137,271 L143,276 L144,278 L144,286 L140,292 L129,299 L104,313 L92,321 L80,331 L70,334 L63,334 L54,331 L47,325 L44,320 L27,317 L5,316 L-16,318 L-31,321 L-37,328 L-43,331 L-58,331 L-75,326 L-99,318 L-126,313 L-136,309 L-140,304 L-140,297 L-136,284 L-136,275 L-138,266 L-137,257 L-131,252 L-112,246 L-104,239 L-98,230 L-95,227 L-96,216 L-93,206 L-87,192 L-76,162 L-69,149 L-59,135 L-47,119 L-44,113 L-43,107 L-43,81 L-44,68 L-44,41 L-41,27 L-36,17 L-27,9 L-11,2 Z M11,45 L5,49 L1,56 L0,59 L0,68 L1,72 L7,74 L8,64 L10,60 L12,59 L19,59 L23,64 L23,74 L20,80 L25,79 L29,74 L31,67 L31,60 L28,52 L23,47 L20,45 Z M-29,48 L-34,52 L-37,58 L-38,68 L-35,78 L-30,83 L-27,81 L-27,79 L-31,78 L-33,71 L-33,64 L-31,60 L-26,59 L-21,64 L-19,73 L-14,71 L-14,59 L-18,51 L-23,48 Z M-20,73 Z M-8,78 L-16,82 L-30,93 L-29,98 L-24,103 L-15,110 L-8,111 L8,103 L21,95 L22,90 L15,86 L-4,79 Z M27,101 L11,109 L-3,117 L-9,119 L-18,118 L-28,111 L-34,106 L-38,124 L-43,134 L-49,143 L-56,161 L-64,181 L-69,191 L-72,202 L-73,208 L-73,220 L-70,230 L-63,239 L-49,250 L-36,261 L-33,265 L-33,275 L-37,279 L-40,282 L-30,293 L-26,297 L-3,297 L13,295 L24,291 L36,284 L48,273 L50,270 L52,237 L54,233 L56,232 L65,231 L67,225 L68,217 L68,198 L64,180 L54,153 L43,128 L34,108 L29,101 Z M-90,237 L-94,242 L-100,252 L-108,256 L-123,260 L-126,263 L-125,273 L-125,282 L-128,293 L-128,300 L-122,303 L-92,309 L-65,319 L-57,321 L-50,321 L-43,315 L-40,310 L-40,301 L-45,291 L-52,283 L-64,264 L-74,248 L-82,239 L-85,237 Z M65,242 L62,244 L62,272 L57,302 L58,312 L62,319 L67,322 L74,321 L80,318 L89,311 L97,304 L119,292 L131,285 L132,281 L126,276 L117,270 L114,265 L111,249 L110,247 L108,247 L102,256 L92,261 L88,262 L77,262 L72,259 L69,254 L67,242 Z"/></svg>
+          Linux
+        </button>
+      </div>
+    </div>
+    <div class="progress-card">
+      <div class="progress-label"><span>Progress</span><span id="progress-pct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <button class="reset-btn" id="reset-btn" title="Clear all completed lessons">
+        <svg class="reset-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Reset progress
+      </button>
+    </div>
+    <nav class="nav" id="nav"></nav>
+  </aside>
+
+  <div class="scrim" id="scrim"></div>
+
+  <main class="main">
+    <div class="topbar">
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Open navigation menu" title="Menu">
+        <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+      </button>
+      <div class="crumbs" id="crumbs"></div>
+      <div class="topbar-shortcuts">
+        <span><kbd>J</kbd> next</span>
+        <span><kbd>K</kbd> prev</span>
+        <span><kbd>Space</kbd> play/pause</span>
+      </div>
+    </div>
+    <div class="lesson" id="lesson"></div>
+  </main>
+</div>
+
+<script>
+function detectOS() {
+  const ua = (navigator.userAgent || navigator.platform || "").toLowerCase();
+  if (ua.includes("win")) return "windows";
+  if (ua.includes("mac")) return "mac";
+  if (ua.includes("linux") || ua.includes("x11")) return "linux";
+  return "mac";
+}
+const state = {
+  current: null,
+  done: new Set(JSON.parse(localStorage.getItem("ght.done") || "[]")),
+  collapsed: new Set(JSON.parse(localStorage.getItem("ght.collapsed") || "[]")),
+  os: localStorage.getItem("ght.os") || detectOS(),  // mac | windows | linux
+  activeTerminal: null,
+};
+
+// ---- OS-specific prompt + path helpers ----
+const OS_PROFILE = {
+  mac:     { host: "USERNAME@mac",     cwd: "~/projects/landing-site",        promptChar: "$", homeDir: "/Users/USERNAME", sshDir: "/Users/USERNAME/.ssh", cwdProjects: "~/projects" },
+  linux:   { host: "USERNAME@linux",   cwd: "~/projects/landing-site",        promptChar: "$", homeDir: "/home/USERNAME",  sshDir: "/home/USERNAME/.ssh",  cwdProjects: "~/projects" },
+  windows: { host: "PS C:\\Users\\USERNAME", cwd: "C:\\Users\\USERNAME\\projects\\landing-site", promptChar: ">", homeDir: "C:\\Users\\USERNAME", sshDir: "C:\\Users\\USERNAME\\.ssh", cwdProjects: "C:\\Users\\USERNAME\\projects" },
+};
+function osProfile() { return OS_PROFILE[state.os] || OS_PROFILE.mac; }
+function pickOS(value, fallback) {
+  // Resolve a command/output that may be string OR {mac, windows, linux} to the current OS
+  if (value && typeof value === "object" && (value.mac || value.windows || value.linux)) {
+    return value[state.os] || value.mac || value.linux || value.windows || fallback;
+  }
+  return value;
+}
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+function el(tag, attrs = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") node.className = v;
+    else if (k === "html") node.innerHTML = v;
+    else if (k.startsWith("on") && typeof v === "function") node.addEventListener(k.slice(2), v);
+    else if (v !== null && v !== undefined) node.setAttribute(k, v);
+  }
+  for (const c of children.flat()) {
+    if (c == null) continue;
+    node.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  }
+  return node;
+}
+
+class Terminal {
+  constructor(host, script, opts = {}) {
+    this.host = host;
+    this.script = script;
+    this.opts = Object.assign({ typeMs: 22, lineGapMs: 240, outputMs: 16, title: null, cwd: null }, opts);
+    this.running = false; this.paused = false; this.cancelToken = 0; this.complete = false;
+    this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    this.render();
+  }
+  get terminalTitle() {
+    if (this.opts.title) return this.opts.title;
+    return state.os === "windows" ? "PowerShell" : (state.os === "linux" ? "bash" : "zsh");
+  }
+  get effectiveCwd() {
+    const o = osProfile();
+    let c = this.opts.cwd;
+    if (!c) return o.cwd;
+    // If cwd was passed as a Unix path, translate to Windows for windows
+    if (state.os === "windows") {
+      if (c.startsWith("~/")) c = "C:\\Users\\USERNAME\\" + c.slice(2).replace(/\//g, "\\");
+      else c = c.replace(/\//g, "\\");
+    }
+    return c;
+  }
+  render() {
+    this.host.innerHTML = "";
+    const wrap = el("div", { class: "terminal" });
+    const head = el("div", { class: "terminal-head" });
+    head.appendChild(el("div", { class: "terminal-dots" }, el("span"), el("span"), el("span")));
+    head.appendChild(el("div", { class: "terminal-title" }, this.terminalTitle));
+    const controls = el("div", { class: "terminal-controls" });
+    this.playBtn = el("button", { class: "term-btn primary", onclick: () => this.toggle() },
+      el("svg", { class: "ico", viewBox: "0 0 24 24", html: '<polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"/>' }),
+      el("span", { class: "play-label" }, "Play"));
+    this.replayBtn = el("button", { class: "term-btn", onclick: () => this.replay() },
+      el("svg", { class: "ico", viewBox: "0 0 24 24", html: '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>' }),
+      "Replay");
+    this.skipBtn = el("button", { class: "term-btn", onclick: () => this.skip() },
+      el("svg", { class: "ico", viewBox: "0 0 24 24", html: '<polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>' }),
+      "Skip");
+    controls.append(this.playBtn, this.replayBtn, this.skipBtn);
+    head.appendChild(controls);
+    wrap.appendChild(head);
+    this.bodyEl = el("div", { class: "terminal-body" });
+    wrap.appendChild(this.bodyEl);
+    this.host.appendChild(wrap);
+    this._writeIntro();
+  }
+  _writeIntro() {
+    if (this.opts.intro) {
+      const intro = el("div", { class: "term-line" });
+      intro.innerHTML = `<span class="term-out muted">${this.opts.intro}</span>`;
+      this.bodyEl.appendChild(intro);
+    }
+  }
+  setPlayLabel(t) { const lbl = this.playBtn.querySelector(".play-label"); if (lbl) lbl.textContent = t; }
+  toggle() {
+    state.activeTerminal = this;
+    if (this.complete) { this.replay(); return; }
+    if (this.running) {
+      this.paused = !this.paused;
+      this.setPlayLabel(this.paused ? "Resume" : "Pause");
+      return;
+    }
+    this.run();
+  }
+  replay() {
+    state.activeTerminal = this;
+    this.cancelToken++;
+    this.running = false; this.paused = false; this.complete = false;
+    this.bodyEl.innerHTML = "";
+    this._writeIntro();
+    this.setPlayLabel("Play");
+    this.run();
+  }
+  skip() {
+    this.cancelToken++;
+    this.running = false; this.paused = false;
+    this.bodyEl.innerHTML = "";
+    this._writeIntro();
+    for (const step of this.script) this._writeStepInstant(step);
+    this.complete = true;
+    this.setPlayLabel("Replay");
+    this._scrollEnd();
+  }
+  _scrollEnd() { this.bodyEl.scrollTop = this.bodyEl.scrollHeight; }
+  async _sleep(ms) {
+    const token = this.cancelToken;
+    let waited = 0;
+    while (waited < ms) {
+      if (this.cancelToken !== token) throw "cancel";
+      while (this.paused) {
+        await new Promise(r => setTimeout(r, 60));
+        if (this.cancelToken !== token) throw "cancel";
+      }
+      const tick = Math.min(20, ms - waited);
+      await new Promise(r => setTimeout(r, tick));
+      waited += tick;
+    }
+  }
+  _promptLine() {
+    const line = el("div", { class: "term-line" });
+    const cwd = this.effectiveCwd;
+    const o = osProfile();
+    if (state.os === "windows") {
+      // PowerShell-style: PS C:\path>
+      line.innerHTML = `<span class="term-host">PS</span> <span class="term-cwd">${cwd}</span><span class="term-prompt">${o.promptChar}</span> `;
+    } else {
+      line.innerHTML = `<span class="term-host">${o.host}</span><span class="term-out muted">:</span><span class="term-cwd">${cwd}</span><span class="term-prompt">${o.promptChar}</span> `;
+    }
+    return line;
+  }
+  _resolveCmd(cmd) { return pickOS(cmd, cmd); }
+  _resolveOutput(out) {
+    if (out && typeof out.text === "object") return { text: pickOS(out.text, ""), cls: out.cls };
+    return out;
+  }
+  _writeStepInstant(step) {
+    if (step.type === "blank") { this.bodyEl.appendChild(el("div", { class: "term-line" }, " ")); return; }
+    if (step.type === "note") {
+      const line = el("div", { class: "term-line" });
+      const text = pickOS(step.text, step.text);
+      line.innerHTML = `<span class="term-out muted"># ${text}</span>`;
+      this.bodyEl.appendChild(line);
+      return;
+    }
+    if (step.type === "delay") return;
+    const line = this._promptLine();
+    const cmd = el("span", { class: "term-cmd" }, this._resolveCmd(step.cmd));
+    line.appendChild(cmd);
+    this.bodyEl.appendChild(line);
+    if (step.output) {
+      for (const rawOut of step.output) {
+        const out = this._resolveOutput(rawOut);
+        if (!out || out.text === "" || out.text == null) continue;
+        const outLine = el("div", { class: "term-line" });
+        const cls = out.cls || "";
+        outLine.innerHTML = `<span class="term-out ${cls}">${out.text}</span>`;
+        this.bodyEl.appendChild(outLine);
+      }
+    }
+  }
+  async _typeCmd(line, text) {
+    const cmdSpan = el("span", { class: "term-cmd" });
+    const cursor = el("span", { class: "cursor" });
+    line.appendChild(cmdSpan);
+    line.appendChild(cursor);
+    if (this.reducedMotion) {
+      cmdSpan.textContent = text;
+      await this._sleep(120);
+    } else {
+      for (let i = 0; i < text.length; i++) {
+        cmdSpan.textContent = text.slice(0, i + 1);
+        this._scrollEnd();
+        await this._sleep(this.opts.typeMs + (Math.random() * 18 - 9));
+      }
+    }
+    cursor.remove();
+  }
+  async _writeOutput(out) {
+    const line = el("div", { class: "term-line" });
+    const cls = out.cls || "";
+    line.innerHTML = `<span class="term-out ${cls}">${out.text}</span>`;
+    this.bodyEl.appendChild(line);
+    this._scrollEnd();
+    await this._sleep(this.opts.outputMs);
+  }
+  async run() {
+    state.activeTerminal = this;
+    this.running = true; this.paused = false; this.complete = false;
+    this.setPlayLabel("Pause");
+    const token = ++this.cancelToken;
+    try {
+      for (const step of this.script) {
+        if (this.cancelToken !== token) return;
+        if (step.type === "blank") {
+          this.bodyEl.appendChild(el("div", { class: "term-line" }, " "));
+          this._scrollEnd();
+          await this._sleep(160);
+        } else if (step.type === "note") {
+          const line = el("div", { class: "term-line" });
+          const noteText = pickOS(step.text, step.text);
+          line.innerHTML = `<span class="term-out muted"># ${noteText}</span>`;
+          this.bodyEl.appendChild(line);
+          this._scrollEnd();
+          await this._sleep(this.opts.lineGapMs);
+        } else if (step.type === "delay") {
+          await this._sleep(step.ms || 600);
+        } else {
+          const line = this._promptLine();
+          this.bodyEl.appendChild(line);
+          this._scrollEnd();
+          await this._sleep(110);
+          await this._typeCmd(line, this._resolveCmd(step.cmd));
+          await this._sleep(220);
+          if (step.output) {
+            for (const rawOut of step.output) {
+              if (this.cancelToken !== token) return;
+              const out = this._resolveOutput(rawOut);
+              if (!out || out.text === "" || out.text == null) continue;
+              await this._writeOutput(out);
+            }
+          }
+          await this._sleep(this.opts.lineGapMs);
+        }
+      }
+      this.complete = true;
+      this.running = false;
+      this.setPlayLabel("Replay");
+    } catch (e) {
+      if (e !== "cancel") console.error(e);
+    }
+  }
+}
+
+const $cmd = (cmd, ...output) => ({ type: "cmd", cmd, output });
+const $out = (text, cls) => ({ text, cls: cls || "" });
+const $note = (text) => ({ type: "note", text });
+const $blank = () => ({ type: "blank" });
+const $delay = (ms) => ({ type: "delay", ms });
+
+const LESSONS = [];
+const TERMINAL_SCRIPTS = {};
+function L(id, group, title, time, render) { LESSONS.push({ id, group, title, time, render }); }
+function term(name, opts = {}) {
+  return `<div class="term-host-mount" data-script="${name}" data-opts='${JSON.stringify(opts).replace(/'/g, "&apos;")}'></div>`;
+}
+</script>
+
+<script>
+L("welcome", "Foundations", "Welcome — why this exists", "3 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Hello. This walkthrough is built for someone who has never used Git or GitHub before, and wants to actually understand it — not just memorise a few commands. By the end, you'll be able to read a repository, understand what your developer is doing, contribute changes yourself, and even run automated tests when code gets pushed.</p>
+
+    <p>You'll see <strong>fake terminal windows</strong> throughout. Hit the <em>Play</em> button on each one — commands type themselves out and the output appears like it would on a real machine. You can pause, replay, or skip whenever you like.</p>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8V18h6v-1.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg>
+        How to get the most out of this
+      </div>
+      <div class="callout-body">
+        <p>Don't rush. Each lesson builds on the previous one. When a terminal demo plays, read what's happening on each line — Git's output is verbose on purpose, and learning to skim it is half the battle. Use <kbd>J</kbd> and <kbd>K</kbd> (or arrow keys) to move between lessons.</p>
+      </div>
+    </div>
+
+    <h2>What you'll learn</h2>
+    <p>The course is split into four sections:</p>
+    <ul>
+      <li><strong>Foundations</strong> — what Git and GitHub actually are, and how to set them up on your machine.</li>
+      <li><strong>Beginner</strong> — the everyday commands: create a repo, save changes, sync with GitHub.</li>
+      <li><strong>Intermediate</strong> — branches, pull requests, code review. This is where collaboration starts.</li>
+      <li><strong>Advanced</strong> — Issues, Projects, GitHub Actions (automation), and how to undo mistakes safely.</li>
+    </ul>
+
+    <div class="takeaways">
+      <h3>Why this matters</h3>
+      <ul>
+        <li>If you're hiring a developer, you don't need to write code — but knowing what they're doing in GitHub turns vague status updates into concrete progress you can actually verify.</li>
+        <li>The skills here are universal: every modern software team uses GitHub or something nearly identical.</li>
+      </ul>
+    </div>
+  `);
+});
+
+L("what-is-github", "Foundations", "Git vs GitHub", "5 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>People use these two words interchangeably, but they're not the same thing. Getting the distinction clear up front saves a lot of confusion later.</p>
+
+    <h2>Git is the tool. GitHub is the place.</h2>
+    <p><strong>Git</strong> is a piece of software that runs on your computer. It tracks every change you make to a folder of files — like an extremely thorough version of "Track Changes" in Word, but for any kind of file. Every time you save a checkpoint (called a <em>commit</em>), Git remembers exactly what changed, when, and who did it. You can go back to any previous version at any time.</p>
+
+    <p><strong>GitHub</strong> is a website (owned by Microsoft) where you can store your Git-tracked folders online. It adds collaboration features on top of Git: a web interface to browse code, a way to discuss changes before merging them in, a place to file bug reports, and automation for testing and deploying code.</p>
+
+    <div class="diagram">
+      <div class="diagram-col">
+        <h4>Git</h4>
+        <div class="diagram-box highlight">Runs on your computer</div>
+        <div class="diagram-arrow">↓</div>
+        <div class="diagram-box">Tracks file history</div>
+        <div class="diagram-arrow">↓</div>
+        <div class="diagram-box">Open source, free</div>
+      </div>
+      <div class="diagram-col">
+        <h4>The connection</h4>
+        <div class="diagram-box" style="margin-top:30px;">Git pushes /<br/>pulls changes</div>
+        <div class="diagram-arrow" style="font-size:24px;">⇄</div>
+        <div class="diagram-box">over the internet</div>
+      </div>
+      <div class="diagram-col">
+        <h4>GitHub</h4>
+        <div class="diagram-box highlight">Runs in the cloud</div>
+        <div class="diagram-arrow">↓</div>
+        <div class="diagram-box">Stores repositories</div>
+        <div class="diagram-arrow">↓</div>
+        <div class="diagram-box">Adds collaboration</div>
+      </div>
+    </div>
+
+    <h2>An analogy</h2>
+    <p>Think of Git as Microsoft Word's "Track Changes" feature, and GitHub as a OneDrive folder where you share documents with your team. You could use Git without ever touching GitHub (a lot of solo developers do exactly that for their own projects). And you can browse GitHub without writing code (millions of people do that every day to read open-source projects).</p>
+
+    <p>But the two together are what makes modern software collaboration work.</p>
+
+    <div class="callout info">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Alternatives to GitHub
+      </div>
+      <div class="callout-body">
+        <p>GitLab and Bitbucket are competitors that do roughly the same thing. Everything you learn here transfers — the commands are identical, only the website differs.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li><strong>Git</strong> is the version control software that runs on your computer.</li>
+        <li><strong>GitHub</strong> is the website that hosts Git repositories and adds collaboration tools.</li>
+        <li>When someone says "push to GitHub", they mean: use the Git tool on your machine to upload your changes to the GitHub website.</li>
+      </ul>
+    </div>
+  `);
+});
+
+L("mental-model", "Foundations", "Repos, commits, branches — the mental model", "6 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Before touching any commands, it helps to have the right picture in your head. Three words come up constantly: <em>repository</em>, <em>commit</em>, and <em>branch</em>. Once these click, everything else slots into place.</p>
+
+    <h2>Repository</h2>
+    <p>A <strong>repository</strong> (or <em>repo</em>) is a folder that Git is tracking. That's it. From the outside it looks like an ordinary folder on your computer with files inside. But there's a hidden <code>.git</code> sub-folder where Git keeps the complete history of every change, every author, every checkpoint, going all the way back to when the project started.</p>
+
+    <p>One project = one repo. The whole codebase for a website, app, or piece of software lives inside a single repository.</p>
+
+    <h2>Commit</h2>
+    <p>A <strong>commit</strong> is a saved checkpoint. When you've made some changes and you're happy with where things are, you <em>commit</em> them — Git takes a snapshot of every file in the repo and remembers it forever, attached to a short message you write describing what changed.</p>
+
+    <p>Commits look something like this in the history:</p>
+
+    <div class="branch-diagram"><span class="bd-label">a1b2c3d</span>  <span class="bd-feat">Add contact form to homepage</span>           — 2 minutes ago
+<span class="bd-label">f4e5d6a</span>  <span class="bd-feat">Fix typo in hero headline</span>                — 1 hour ago
+<span class="bd-label">9c8b7a6</span>  <span class="bd-feat">Update pricing page copy</span>                 — yesterday
+<span class="bd-label">3d2e1f0</span>  <span class="bd-feat">Initial commit</span>                           — 3 days ago</div>
+
+    <p>The strings like <code>a1b2c3d</code> are <em>commit hashes</em> — unique IDs Git assigns to each checkpoint. You'll see them everywhere.</p>
+
+    <h2>Branch</h2>
+    <p>A <strong>branch</strong> is a parallel line of work. Imagine your project's history as a tree: the trunk is the main version of the code (usually called <code>main</code>), and a branch is a separate line that grows off the trunk so you can experiment without disturbing what's working.</p>
+
+    <div class="branch-diagram"><span class="bd-main">main</span>      ●───●───●───●───────●
+                  \\                /
+<span class="bd-feat">feature</span>          ●───●───●───●
+
+(when ready, the feature branch "merges" back into main)</div>
+
+    <p>Why bother? Because real work isn't linear. Your developer might be working on a new login system on one branch, while a designer fixes a typo on another, while the deployed live site happily runs from a third — all at the same time, all in the same repo, without anyone stepping on anyone else's toes.</p>
+
+    <h2>Putting it together</h2>
+    <p>So: a <strong>repo</strong> is the folder. Inside the repo, history is a series of <strong>commits</strong>. The history can split into multiple <strong>branches</strong> that grow in parallel and eventually merge back together. That's the whole mental model.</p>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        One more word: clone
+      </div>
+      <div class="callout-body">
+        <p>When you <strong>clone</strong> a repo, you're downloading a full copy of it (with its entire history) onto your computer. After cloning, you have a working copy you can change freely — and when you're ready to share your changes back, you <em>push</em> them up to GitHub.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li><strong>Repo</strong> = a folder Git is tracking. Contains your code plus its entire history.</li>
+        <li><strong>Commit</strong> = a saved checkpoint, with a message describing what changed.</li>
+        <li><strong>Branch</strong> = a parallel line of commits, so multiple lines of work can happen at once.</li>
+        <li><strong>Clone</strong> = download a copy of a repo to your machine.</li>
+      </ul>
+    </div>
+  `);
+});
+
+L("setup", "Foundations", "Installing Git and configuring your identity", "5 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Time to get Git running on your computer and connected to GitHub. This is the only "setup" lesson — once it's done, you won't have to do it again.</p>
+
+    <h2>1. Install Git</h2>
+    <p>How you install Git depends on your operating system:</p>
+    <ul>
+      <li><strong>macOS</strong> — open Terminal and type <code>git --version</code>. If Git isn't installed, macOS will offer to install the Xcode Command Line Tools, which includes it. Accept.</li>
+      <li><strong>Windows</strong> — download the installer from <a href="https://git-scm.com/download/win">git-scm.com/download/win</a> and run it. Accept all the defaults during installation.</li>
+      <li><strong>Linux</strong> — your package manager already has it. On Ubuntu/Debian: <code>sudo apt install git</code>.</li>
+    </ul>
+
+    <p>Verify it worked by opening a terminal and asking Git what version it is:</p>
+
+    ${term("setup-version")}
+
+    <h2>2. Create a GitHub account</h2>
+    <p>Go to <a href="https://github.com">github.com</a> and sign up. Free is fine — you only pay GitHub if you want private repositories with lots of collaborators, or extra automation minutes. Pick a username carefully; it'll appear in URLs forever.</p>
+
+    <h2>3. Tell Git who you are</h2>
+    <p>Every commit you make gets tagged with your name and email. You need to tell Git these once, globally, so it knows who to credit. Run these in your terminal — replace the values with your own:</p>
+
+    ${term("setup-identity")}
+
+    <p>The <code>--global</code> flag means this applies to <em>every</em> repo on your machine. You only do it once.</p>
+
+    <h2>4. Connect your machine to GitHub (SSH key)</h2>
+    <p>To push and pull code from GitHub privately, your machine needs a way to prove it's really you. The standard way is an <strong>SSH key</strong> — a pair of cryptographic files. One stays on your computer; the matching one gets uploaded to GitHub.</p>
+
+    ${term("setup-ssh")}
+
+    <p>After generating the key, the public half is printed by <code>cat ~/.ssh/id_ed25519.pub</code>. Copy that whole line. Then go to <strong>github.com → Settings → SSH and GPG keys → New SSH key</strong>, paste it in, give it a title (like "My laptop"), and save.</p>
+
+    <div class="callout warn">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Public key only
+      </div>
+      <div class="callout-body">
+        <p>Only ever upload the <code>.pub</code> file's contents. The other file (without <code>.pub</code>) is your private key and must never leave your computer. Treat it like a password.</p>
+      </div>
+    </div>
+
+    <h2>5. Test the connection</h2>
+    <p>The moment of truth — can your machine talk to GitHub?</p>
+
+    ${term("setup-test")}
+
+    <p>If you see "successfully authenticated" with your username, you're set. From here on, every lesson assumes Git is installed and connected.</p>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>Install Git, then check <code>git --version</code> works.</li>
+        <li>Set your name and email globally — Git tags every commit with them.</li>
+        <li>Generate an SSH key, upload the <code>.pub</code> half to GitHub, keep the other half secret.</li>
+        <li><code>ssh -T git@github.com</code> proves the connection is live.</li>
+      </ul>
+    </div>
+  `);
+});
+
+TERMINAL_SCRIPTS["setup-version"] = [
+  $cmd("git --version", $out("git version 2.43.0")),
+];
+
+TERMINAL_SCRIPTS["setup-identity"] = [
+  $cmd('git config --global user.name "Your Name"'),
+  $cmd('git config --global user.email "YOUR_EMAIL"'),
+  $note("verify it took"),
+  $cmd("git config --global --list",
+    $out("user.name=Your Name"),
+    $out("user.email=YOUR_EMAIL"),
+    $out("init.defaultBranch=main"),
+  ),
+];
+
+TERMINAL_SCRIPTS["setup-ssh"] = [
+  $note("generate a new SSH key pair"),
+  $cmd('ssh-keygen -t ed25519 -C "YOUR_EMAIL"',
+    $out("Generating public/private ed25519 key pair.", "muted"),
+    { text: { mac: "Enter file in which to save the key (/Users/USERNAME/.ssh/id_ed25519): ", linux: "Enter file in which to save the key (/home/USERNAME/.ssh/id_ed25519): ", windows: "Enter file in which to save the key (C:\\Users\\USERNAME/.ssh/id_ed25519): " }, cls: "muted" },
+    $out("[press Enter to accept the default]", "muted"),
+    $out("Enter passphrase (empty for no passphrase): ", "muted"),
+    $out("Enter same passphrase again: ", "muted"),
+    { text: { mac: "Your identification has been saved in /Users/USERNAME/.ssh/id_ed25519", linux: "Your identification has been saved in /home/USERNAME/.ssh/id_ed25519", windows: "Your identification has been saved in C:\\Users\\USERNAME/.ssh/id_ed25519" }, cls: "success" },
+    { text: { mac: "Your public key has been saved in /Users/USERNAME/.ssh/id_ed25519.pub", linux: "Your public key has been saved in /home/USERNAME/.ssh/id_ed25519.pub", windows: "Your public key has been saved in C:\\Users\\USERNAME/.ssh/id_ed25519.pub" }, cls: "success" },
+  ),
+  $note("print the public key so you can copy it"),
+  $cmd({ mac: "cat ~/.ssh/id_ed25519.pub", linux: "cat ~/.ssh/id_ed25519.pub", windows: "type $env:USERPROFILE\\.ssh\\id_ed25519.pub" },
+    $out("ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN3p... YOUR_EMAIL"),
+  ),
+];
+
+TERMINAL_SCRIPTS["setup-test"] = [
+  $cmd("ssh -T git@github.com",
+    $out("The authenticity of host 'github.com (140.82.112.3)' can't be established.", "muted"),
+    $out("ED25519 key fingerprint is SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU.", "muted"),
+    $out("Are you sure you want to continue connecting (yes/no)? yes", "muted"),
+    $out("Warning: Permanently added 'github.com' to the list of known hosts.", "muted"),
+    $blank(),
+    $out("Hi OWNER! You've successfully authenticated, but GitHub does not provide shell access.", "success"),
+  ),
+];
+</script>
+
+<script>
+L("github-desktop", "Foundations", "Skip the terminal: GitHub Desktop", "8 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Everything in this walkthrough can also be done without typing a single command. <strong>GitHub Desktop</strong> is a free app from GitHub that wraps the same Git workflow in buttons and panels. It's the right tool if you'll use GitHub occasionally, or if the command line just isn't your comfort zone.</p>
+
+    <p>You don't have to choose one or the other. The terminal and Desktop are reading and writing the <em>same Git repository on disk</em> — you can use Desktop most days and drop into the terminal when you need something specific.</p>
+
+    <div class="callout info">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Which should you learn?
+      </div>
+      <div class="callout-body">
+        <p>Learn the command line if you're aiming to work in code daily — every developer's tools assume CLI fluency. Stick with Desktop if you're a non-developer dipping into GitHub for documentation, marketing pages, or occasional commits. Both move the same Git history; neither is "wrong."</p>
+      </div>
+    </div>
+
+    <h2>Installing it</h2>
+    <ul>
+      <li><strong>macOS / Windows</strong> — download from <a href="https://desktop.github.com" target="_blank" rel="noopener">desktop.github.com</a>, run the installer.</li>
+      <li><strong>Linux</strong> — the official Desktop app isn't published for Linux, but a community fork is maintained at <a href="https://github.com/shiftkey/desktop" target="_blank" rel="noopener">github.com/shiftkey/desktop</a>. Most Linux users stick with the terminal or use a different GUI (GitKraken, VS Code's built-in panel).</li>
+    </ul>
+
+    <p>On first launch, Desktop asks you to sign in to GitHub — click <strong>Sign in to GitHub.com</strong>, the browser opens, you authenticate, you're back in the app. It then asks for your name and email for commits (the GUI equivalent of <code>git config user.name</code> and <code>user.email</code> you saw in the previous lesson).</p>
+
+    <h2>The five operations you'll do every day</h2>
+    <p>Below is the same workflow you'll see in CLI form throughout the rest of this tutorial, translated to clicks. If a later lesson covers a command and you'd rather do it in Desktop, this is your cheat sheet.</p>
+
+    <h3>Cloning a repo</h3>
+    <p>The Desktop equivalent of <code>git clone &lt;url&gt;</code>:</p>
+    <ol>
+      <li>Top menu: <strong>File → Clone repository…</strong></li>
+      <li>The dialog has three tabs — <em>GitHub.com</em>, <em>GitHub Enterprise</em>, <em>URL</em>. Most often you'll use <em>GitHub.com</em>: it lists every repo you have access to. Click one.</li>
+      <li>Choose a local folder where the repo will live.</li>
+      <li>Click <strong>Clone</strong>.</li>
+    </ol>
+
+    <h3>Seeing what's changed (the equivalent of <code>git status</code> and <code>git diff</code>)</h3>
+    <p>Desktop's main window is essentially a permanent <code>git status</code>. The left panel shows <strong>Changes</strong> — every file you've added, modified, or deleted. Click any file and the right side shows a colored diff: green for additions, red for deletions, exactly like a Pull Request page on github.com.</p>
+
+    <h3>Staging and committing</h3>
+    <p>In CLI you'd run <code>git add</code> followed by <code>git commit -m "message"</code>. In Desktop, the staging step is the checkbox next to each filename — tick the files you want included. Below the file list is the commit message box. Type a summary, optionally a longer description, click the blue <strong>Commit to main</strong> button (the branch name in the button updates depending on which branch you're on). One click does both <code>add</code> and <code>commit</code>.</p>
+
+    <h3>Pushing and pulling</h3>
+    <p>After a commit, the top toolbar shows a <strong>Push origin</strong> button with a number indicating how many commits are queued. Click it to upload to GitHub. If GitHub has commits you don't have locally, the same button shows <strong>Pull origin</strong> instead — click to download them. If both at once, Desktop calls it <strong>Fetch origin</strong> and shows a small indicator.</p>
+
+    <h3>Branching</h3>
+    <p>The branch dropdown in the top bar shows your current branch and lets you create or switch to others. Click it, then either pick an existing branch or click <strong>New branch</strong>. Desktop handles the equivalent of <code>git switch -c &lt;name&gt;</code> for you. Once on the new branch, every commit is recorded there until you switch back.</p>
+
+    <h2>The "View on GitHub" button</h2>
+    <p>Anywhere in Desktop, the toolbar has a <strong>View on GitHub</strong> button that opens the current repo on github.com in your browser. Use it constantly. Anything Desktop doesn't have a button for — opening a Pull Request, browsing past commits in detail, managing issues, configuring Pages — you do on the website. The two are designed to be used together, not as substitutes.</p>
+
+    <h2>What Desktop deliberately doesn't do</h2>
+    <p>Desktop covers about 80% of day-to-day Git workflow. The remaining 20% — rebasing interactively, cherry-picking specific commits, stashing changes, surgical history rewrites, anything ending in <code>--force</code> — is either hidden behind menus or simply not exposed. That's intentional: those operations are dangerous if you don't understand them, and the CLI is the right place for them.</p>
+
+    <p>When you eventually need one of those operations, you have two options: open a terminal in the repo folder and run the command (Desktop won't get confused — it'll just refresh and show the new state), or use a more powerful GUI like GitKraken or the Git panel inside VS Code, which expose those operations through their own UIs.</p>
+
+    <h2>Other GUI options worth knowing</h2>
+    <ul>
+      <li><strong>VS Code (free)</strong> — the Source Control panel is built into Microsoft's editor. If you write any code at all, you probably have VS Code installed already, and its Git integration covers everything Desktop does plus more.</li>
+      <li><strong>GitKraken (free for personal use)</strong> — a richer GUI that visualises history as a graph. Many developers prefer it for navigating complex branch histories.</li>
+      <li><strong>JetBrains IDEs</strong> — IntelliJ, PyCharm, WebStorm, etc., all have first-class Git UIs built in. If you already use one of these, you have a powerful Git GUI without installing anything else.</li>
+    </ul>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8V18h6v-1.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg>
+        Follow along either way
+      </div>
+      <div class="callout-body">
+        <p>The rest of this walkthrough uses terminal commands as the primary teaching format because the commands are universal — they work in every Git GUI, every CI pipeline, every server, forever. But anywhere you see a command, the Desktop equivalent above does the same thing on the same repo. Pick whichever path keeps you moving.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>GitHub Desktop is a free GUI that wraps the same Git operations the CLI runs.</li>
+        <li>Five core operations: clone, see-changes, commit (with built-in staging), push/pull, branch.</li>
+        <li>Desktop and the terminal share the same repo on disk — switch freely between them.</li>
+        <li>The "View on GitHub" button is the bridge to features Desktop doesn't expose (Pull Requests, Pages settings, issues).</li>
+        <li>Other options: VS Code's Source Control panel, GitKraken, JetBrains IDEs — pick whichever fits your existing workflow.</li>
+      </ul>
+    </div>
+  `);
+});
+
+
+L("github-browser", "Foundations", "Skip everything: editing in the browser", "7 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>There's a third path that the previous lesson didn't cover: don't install anything. Everything in GitHub — creating files, editing files, uploading files, deleting them, even opening Pull Requests — can be done in your browser on github.com, with no Git installed, no Desktop app, no terminal. For occasional changes, this is often the fastest workflow.</p>
+
+    <p>You'd be surprised how often this is enough. Fixing a typo in a README, swapping out a logo image, dropping a PDF into a folder, publishing a single-page site to Pages — none of these need a local Git setup. Every action you take in the browser quietly becomes a real Git commit, with GitHub typing the commands for you.</p>
+
+    <div class="callout info">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Three paths, one Git
+      </div>
+      <div class="callout-body">
+        <p>Terminal, Desktop, or browser — all three are user interfaces over the same Git repo. A file you upload in the browser shows up in the terminal the next time you <code>git pull</code>. A commit you push from Desktop appears in the browser's history immediately. Mix and match per task, not per philosophy.</p>
+      </div>
+    </div>
+
+    <h2>The five operations you'll actually use</h2>
+
+    <h3>1. Create a new file</h3>
+    <p>From any repo page, click the <strong>Add file</strong> button (top right of the file list) → <strong>Create new file</strong>. You're dropped into a two-pane editor: filename at the top, contents below. Type both, then commit at the bottom of the page.</p>
+
+    <p>The filename field has a hidden superpower: <strong>typing a forward slash creates a folder</strong>. If you type <code>tutorials/git-zero-to-hero.html</code>, GitHub creates the <code>tutorials/</code> folder automatically and puts the file inside it. Type <code>docs/api/intro.md</code> and you get a nested folder structure in a single commit. This is the only way to create empty folders in GitHub — there's no "New folder" button.</p>
+
+    <h3>2. Upload an existing file</h3>
+    <p>From the folder where you want the file to land, click <strong>Add file → Upload files</strong>. You can drag files in from your computer, or click the "choose your files" link to open a picker. Multiple files at once is fine. After they upload, scroll down to commit.</p>
+
+    <div class="callout warn">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Size limits
+      </div>
+      <div class="callout-body">
+        <p>The browser uploader caps single files at <strong>25 MB</strong>. The repository itself caps single files at <strong>100 MB</strong> (anything bigger needs Git LFS). For files between 25 and 100 MB you have to use the terminal, Desktop, or Git LFS. For most documents, images, and PDFs, the 25 MB browser limit is plenty.</p>
+      </div>
+    </div>
+
+    <h3>3. Edit an existing file</h3>
+    <p>Navigate to any text file in the repo (README.md, an HTML file, a config). On the file's page, the toolbar at the top right has a <strong>pencil icon</strong> — click it to enter edit mode. The file becomes a textarea you can change directly. There's a <strong>Preview</strong> tab next to <em>Edit</em> for Markdown files, which shows the rendered version side-by-side with the source.</p>
+
+    <p>When you're done, scroll down to the commit panel and save. You'll get to choose between committing directly to <code>main</code> or creating a new branch and opening a Pull Request — useful if the repo has branch protection.</p>
+
+    <h3>4. Delete a file</h3>
+    <p>On any file's page, the same toolbar has a <strong>trash-can icon</strong> next to the pencil. Click it, scroll down, commit. The file is removed in a new commit (the file isn't gone from history — anyone can recover it via the commit log).</p>
+
+    <h3>5. Rename or move a file</h3>
+    <p>Open the file, click the pencil to edit, then click into the <strong>filename field at the top</strong>. Change the name to rename. Add a path with slashes (<code>archive/old-readme.md</code>) to move it into a folder. Commit. Both rename and move are the same operation under the hood.</p>
+
+    <h2>The commit-message prompt</h2>
+    <p>Every browser action — create, upload, edit, delete, rename — ends with the same commit panel at the bottom of the page. A summary field (defaults to "Create filename.md" or "Update filename.md" if you leave it blank), an optional longer description, and two radio buttons: <em>Commit directly to the <code>main</code> branch</em> or <em>Create a new branch for this commit and start a pull request</em>.</p>
+
+    <p>That second option is how you open a PR entirely from the browser without ever cloning the repo. Pick "create a new branch", give the branch a name, click <strong>Propose changes</strong>, and you land on the PR creation page. The same workflow developers use, with zero local tooling.</p>
+
+    <h2>The github.dev editor (a hidden upgrade)</h2>
+    <p>Anywhere in a GitHub repo, press the <strong>.</strong> (period) key on your keyboard. The whole interface transforms into a browser-based VS Code editor. You can browse the file tree, open multiple files in tabs, do find-and-replace across the repo, and edit anything — all without leaving the browser. Same commit panel at the end.</p>
+
+    <p>This is the right tool when the browser's single-file editor is too clunky (renaming five files, editing related files together, applying the same find-and-replace across the repo). It's free, no install, signed into your GitHub account automatically.</p>
+
+    <h2>When the browser path is the right choice</h2>
+    <ul>
+      <li>One-off edits — typos, link fixes, README updates.</li>
+      <li>Uploading static assets — images, PDFs, documents to a content repo.</li>
+      <li>Publishing a single HTML file to GitHub Pages.</li>
+      <li>Working from a computer that isn't yours (a client's laptop, a hotel desktop) — nothing to install.</li>
+      <li>Quick PRs to other people's projects when you're not set up locally.</li>
+    </ul>
+
+    <h2>When you need to switch to Desktop or the terminal</h2>
+    <ul>
+      <li>You're making many related changes that should commit together — the browser commits one file at a time, which fragments the history.</li>
+      <li>You need to test changes locally before pushing (most code situations).</li>
+      <li>The file is larger than 25 MB.</li>
+      <li>You're using a build tool, linter, or anything that needs to run on your machine.</li>
+      <li>You want to use branches heavily — switching between them in the browser is awkward.</li>
+    </ul>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8V18h6v-1.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg>
+        The mental shortcut
+      </div>
+      <div class="callout-body">
+        <p>If you'd open the file by clicking on it anyway, edit it where you clicked. If you'd want to see the file change in your editor while you work, clone the repo and use Desktop or the terminal. The browser is the right tool when the task fits in a single commit; the local tools are the right tool when it doesn't.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>You can create, upload, edit, rename, and delete files entirely on github.com — no local install needed.</li>
+        <li>Folders are created by typing a slash in the filename field. There's no "New folder" button.</li>
+        <li>The browser uploader caps at 25 MB per file. Repo-wide limit is 100 MB.</li>
+        <li>Every action ends with a commit panel — choose direct-to-main or create-a-branch-and-open-PR.</li>
+        <li>Press <strong>.</strong> in any repo to launch <code>github.dev</code> — a full browser-based VS Code.</li>
+        <li>Best for one-offs and asset uploads. Switch to Desktop or terminal for multi-file changes, big files, or anything you need to test locally.</li>
+      </ul>
+    </div>
+  `);
+});
+
+
+L("first-repo", "Beginner", "Your first repository", "5 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>A repo can start in two places: on GitHub (the cloud) or on your computer. We'll do the GitHub way first because it's simpler and gives you a place to download from later.</p>
+
+    <h2>Create it on GitHub</h2>
+    <p>Click the <strong>+</strong> in the top-right of github.com → <em>New repository</em>. You'll see a form. The two things that matter:</p>
+    <ul>
+      <li><strong>Repository name</strong> — short, lowercase, hyphens for spaces. Something like <code>my-landing-site</code>.</li>
+      <li><strong>Initialize with a README</strong> — tick this. It creates the repo with one file (a README), which means you can clone it immediately.</li>
+    </ul>
+
+    <div class="gh-mock">
+      <div class="gh-mock-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        github.com / Create a new repository
+      </div>
+      <div class="gh-mock-body">
+        <p style="margin-top:0;"><strong>Repository name:</strong> <code>my-landing-site</code></p>
+        <p><strong>Description (optional):</strong> Marketing site for the new product</p>
+        <p><strong>Visibility:</strong> <span class="badge feat">Private</span> &nbsp; <span class="badge docs">Public</span> (only you and people you invite can see a private repo)</p>
+        <p style="margin-bottom:0;"><strong>☑</strong> Add a README file &nbsp; <strong>☐</strong> Add .gitignore &nbsp; <strong>☐</strong> Choose a license</p>
+      </div>
+    </div>
+
+    <p>Hit <em>Create repository</em>. You now have a real Git repo living on GitHub, with one commit in its history (the one that created the README).</p>
+
+    <h2>What you just made</h2>
+    <p>Open the repo's page on GitHub. You'll see:</p>
+    <ul>
+      <li>A file list (just <code>README.md</code> for now).</li>
+      <li>A green <strong>Code</strong> button — that's the one you use to clone it onto your computer.</li>
+      <li>Tabs along the top: <em>Code, Issues, Pull requests, Actions, Projects</em>. We'll touch every one of these eventually.</li>
+      <li>A sidebar on the right with releases, about, and stars.</li>
+    </ul>
+
+    <div class="callout info">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        What's a README?
+      </div>
+      <div class="callout-body">
+        <p>README.md is a plain text file written in Markdown (a simple formatting language). GitHub renders it as the front page of your repo — it's where you explain what the project is, how to use it, and how to contribute. Every good repo has one.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>Creating a repo on GitHub takes about 20 seconds and produces a real, live, version-controlled project.</li>
+        <li><strong>Private</strong> = only you and invitees can see it. <strong>Public</strong> = anyone on the internet can read it (but can't change it without permission).</li>
+        <li>Always initialize with a README — it gives you a file to clone immediately.</li>
+      </ul>
+    </div>
+  `);
+});
+
+L("clone", "Beginner", "Cloning a repo to your computer", "4 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>You've created a repo on GitHub. To actually work on it, you need a copy on your computer. That's called <strong>cloning</strong>.</p>
+
+    <h2>Grab the clone URL</h2>
+    <p>On your repo's GitHub page, click the green <strong>Code</strong> button. A small panel opens with a URL. Switch the tab to <em>SSH</em> (since you set up SSH in the previous lesson) and copy the URL — it looks like <code>git@github.com:OWNER/my-landing-site.git</code>.</p>
+
+    <h2>Clone it</h2>
+    <p>In your terminal, navigate to wherever you want the project to live (most people use <code>~/projects</code> or <code>~/code</code>), then run <code>git clone</code>:</p>
+
+    ${term("clone-demo", { cwd: "~/projects" })}
+
+    <p>Git just downloaded the entire repository — every file, every commit, the whole history — into a new folder called <code>my-landing-site</code>. From now on you work inside that folder.</p>
+
+    <h2>Peek inside</h2>
+    <p>Let's see what's there:</p>
+
+    ${term("clone-peek", { cwd: "~/projects/my-landing-site" })}
+
+    <p>The hidden <code>.git</code> folder is where Git keeps the history. <strong>Never edit anything in there manually.</strong> Touch only the visible files; let Git manage <code>.git</code>.</p>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8V18h6v-1.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg>
+        What "cd" does
+      </div>
+      <div class="callout-body">
+        <p><code>cd</code> stands for "change directory" — it moves your terminal into the named folder, the same way double-clicking a folder in Finder/Explorer takes you inside it. <code>cd ..</code> goes one level up.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li><code>git clone &lt;url&gt;</code> downloads a repo from GitHub to your computer.</li>
+        <li>The URL comes from the green <strong>Code</strong> button on the repo's GitHub page (use the SSH tab).</li>
+        <li>You only clone a repo <em>once</em>. After that you have a working copy you can change as much as you like.</li>
+      </ul>
+    </div>
+  `);
+});
+
+TERMINAL_SCRIPTS["clone-demo"] = [
+  $cmd({ mac: "cd ~/projects", linux: "cd ~/projects", windows: "cd $env:USERPROFILE\\projects" }),
+  $cmd("git clone git@github.com:OWNER/my-landing-site.git",
+    $out("Cloning into 'my-landing-site'...", "muted"),
+    $out("remote: Enumerating objects: 3, done.", "muted"),
+    $out("remote: Counting objects: 100% (3/3), done.", "muted"),
+    $out("remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0", "muted"),
+    $out("Receiving objects: 100% (3/3), done.", "success"),
+  ),
+  $cmd("cd my-landing-site"),
+];
+
+TERMINAL_SCRIPTS["clone-peek"] = [
+  $cmd({ mac: "ls -la", linux: "ls -la", windows: "Get-ChildItem -Force" },
+    { text: { mac: "total 16", linux: "total 16", windows: "    Directory: C:\\Users\\USERNAME\\projects\\my-landing-site" }, cls: "" },
+    { text: { mac: "drwxr-xr-x   4 USERNAME  staff   128 May 12 09:14 .", linux: "drwxr-xr-x   4 USERNAME USERNAME  128 May 12 09:14 .", windows: "" } },
+    { text: { mac: "drwxr-xr-x  18 USERNAME  staff   576 May 12 09:14 ..", linux: "drwxr-xr-x  18 USERNAME USERNAME  576 May 12 09:14 ..", windows: "Mode    LastWriteTime         Length Name" } },
+    { text: { mac: "drwxr-xr-x  12 USERNAME  staff   384 May 12 09:14 .git", linux: "drwxr-xr-x  12 USERNAME USERNAME  384 May 12 09:14 .git", windows: "----    -------------         ------ ----" }, cls: "hunk" },
+    { text: { mac: "-rw-r--r--   1 USERNAME  staff   33  May 12 09:14 README.md", linux: "-rw-r--r--   1 USERNAME USERNAME  33  May 12 09:14 README.md", windows: "d-h--   May 12 09:14                .git" }, cls: "" },
+    { text: { mac: "", linux: "", windows: "-a---   May 12 09:14             33 README.md" }, cls: "" },
+  ),
+  $cmd({ mac: "cat README.md", linux: "cat README.md", windows: "type README.md" },
+    $out("# my-landing-site"),
+    $out("Marketing site for the new product"),
+  ),
+];
+
+L("commit-basics", "Beginner", "Saving changes: status, add, commit", "7 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>This is the core loop of Git. Almost every day of using Git is just three commands repeated: <code>status</code>, <code>add</code>, <code>commit</code>. Get these three solid and you've got the basics.</p>
+
+    <h2>The three-step loop</h2>
+    <ol>
+      <li><strong>Change something</strong> — edit a file, add a new one, delete an old one.</li>
+      <li><strong>Stage</strong> the changes you want to save (<code>git add</code>).</li>
+      <li><strong>Commit</strong> them with a message describing what changed (<code>git commit</code>).</li>
+    </ol>
+
+    <p>The "staging" step might seem odd, but it lets you bundle related changes into a clean checkpoint, even if you changed lots of files at once. Think of it as a tray you put items on before checking out at the supermarket.</p>
+
+    <h2>Walking through it</h2>
+    <p>Let's edit the README and commit the change. First, ask Git what it sees:</p>
+
+    ${term("commit-status-clean")}
+
+    <p>"Nothing to commit, working tree clean" means: no changes detected, everything matches the last commit. Now edit the file:</p>
+
+    ${term("commit-edit")}
+
+    <p>Now <code>git status</code> tells a different story:</p>
+
+    ${term("commit-status-dirty")}
+
+    <p>Git found one modified file: <code>README.md</code>. It's listed as <em>not staged</em> — meaning Git sees the change, but you haven't told it to include the change in the next commit yet.</p>
+
+    <h2>Stage and commit</h2>
+    <p>Use <code>git add</code> to stage, then <code>git commit -m "&lt;message&gt;"</code> to save the checkpoint:</p>
+
+    ${term("commit-stage")}
+
+    <p>Done. That short hash at the end (something like <code>a1b2c3d</code>) is the unique ID of your new commit. The history now has two commits: the original "initial commit" and yours.</p>
+
+    <h2>Anatomy of a good commit message</h2>
+    <p>Commit messages are how you (and everyone else who works on this code) understand what happened, weeks or months later. Two rules:</p>
+    <ul>
+      <li><strong>Start with a verb in imperative mood.</strong> "Add", "Fix", "Update", "Remove". Read it as: "If applied, this commit will <em>add the contact form</em>."</li>
+      <li><strong>Keep the first line under 60 characters.</strong> If you need to say more, leave a blank line after the first line and add detail below.</li>
+    </ul>
+
+    <p>Good: <code>Fix typo in pricing headline</code><br/>
+    Bad: <code>updated stuff</code></p>
+
+    <div class="callout warn">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        A commit is local until you push
+      </div>
+      <div class="callout-body">
+        <p>Committing only saves the checkpoint on <em>your computer</em>. GitHub doesn't see it yet. The next lesson covers <code>git push</code> — that's the step that uploads your commits to GitHub.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li><code>git status</code> shows what's changed but not saved. Run it constantly.</li>
+        <li><code>git add &lt;file&gt;</code> stages a file. <code>git add .</code> stages everything in the current folder.</li>
+        <li><code>git commit -m "message"</code> creates the checkpoint with your message.</li>
+        <li>Commits are saved locally only — they don't appear on GitHub until you <em>push</em>.</li>
+      </ul>
+    </div>
+  `);
+});
+
+TERMINAL_SCRIPTS["commit-status-clean"] = [
+  $cmd("git status",
+    $out("On branch main"),
+    $out("Your branch is up to date with 'origin/main'."),
+    $blank(),
+    $out("nothing to commit, working tree clean", "success"),
+  ),
+];
+
+TERMINAL_SCRIPTS["commit-edit"] = [
+  $cmd({
+    mac: 'echo "\\n## About\\nA simple marketing site." >> README.md',
+    linux: 'echo -e "\\n## About\\nA simple marketing site." >> README.md',
+    windows: 'Add-Content README.md "`n## About`nA simple marketing site."',
+  }),
+  $note("we just appended two lines to README.md"),
+];
+
+TERMINAL_SCRIPTS["commit-status-dirty"] = [
+  $cmd("git status",
+    $out("On branch main"),
+    $out("Your branch is up to date with 'origin/main'."),
+    $blank(),
+    $out("Changes not staged for commit:", "warn"),
+    $out("  (use \"git add <file>...\" to update what will be committed)", "muted"),
+    $out("  (use \"git restore <file>...\" to discard changes in working directory)", "muted"),
+    $out("\\tmodified:   README.md", "removed"),
+    $blank(),
+    $out("no changes added to commit (use \"git add\" and/or \"git commit -a\")", "muted"),
+  ),
+];
+
+TERMINAL_SCRIPTS["commit-stage"] = [
+  $cmd("git add README.md"),
+  $cmd("git status",
+    $out("On branch main"),
+    $out("Changes to be committed:", "success"),
+    $out("  (use \"git restore --staged <file>...\" to unstage)", "muted"),
+    $out("\\tmodified:   README.md", "added"),
+  ),
+  $cmd('git commit -m "Add About section to README"',
+    $out("[main a1b2c3d] Add About section to README", "success"),
+    $out(" 1 file changed, 2 insertions(+)"),
+  ),
+];
+
+L("push", "Beginner", "Pushing to GitHub", "4 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>So far your commit only lives on your computer. <strong>Pushing</strong> uploads it to GitHub so everyone (and every machine) with access to the repo can see it.</p>
+
+    <h2>The command</h2>
+    <p>It's literally one command:</p>
+
+    ${term("push-demo")}
+
+    <p>"main -> main" means: the <code>main</code> branch on your computer is now in sync with the <code>main</code> branch on GitHub. If you refresh the repo page on github.com, your new commit will be there.</p>
+
+    <h2>What "origin" means</h2>
+    <p>When you cloned the repo, Git remembered the URL you cloned from and called it <strong>origin</strong>. It's a nickname — like a contact in your phone — so you don't have to type <code>git@github.com:OWNER/my-landing-site.git</code> every time.</p>
+
+    <p>You can check what origin points to:</p>
+
+    ${term("push-remote")}
+
+    <p>Most projects only ever have one remote, called origin. Bigger projects sometimes have multiple — say, one for the company's GitHub and one for a backup — but you don't need to worry about that yet.</p>
+
+    <h2>The cycle so far</h2>
+    <div class="diagram">
+      <div class="diagram-col">
+        <h4>Working tree</h4>
+        <div class="diagram-box">Edit files</div>
+      </div>
+      <div class="diagram-col">
+        <h4>Local repo</h4>
+        <div class="diagram-box">git add</div>
+        <div class="diagram-arrow">↓</div>
+        <div class="diagram-box highlight">git commit</div>
+      </div>
+      <div class="diagram-col">
+        <h4>GitHub (origin)</h4>
+        <div class="diagram-box highlight">git push</div>
+        <div class="diagram-arrow">↓</div>
+        <div class="diagram-box">Visible online</div>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Push early and often
+      </div>
+      <div class="callout-body">
+        <p>If your laptop dies tomorrow, anything you committed but didn't push is gone. Treat push like "save to the cloud" — push at the end of every working session.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li><code>git push</code> uploads your local commits to GitHub.</li>
+        <li><strong>origin</strong> is the nickname for the GitHub URL you cloned from.</li>
+        <li>Pushing is what makes your work visible to collaborators (and safe from a hard-drive crash).</li>
+      </ul>
+    </div>
+  `);
+});
+
+TERMINAL_SCRIPTS["push-demo"] = [
+  $cmd("git push",
+    $out("Enumerating objects: 5, done.", "muted"),
+    $out("Counting objects: 100% (5/5), done.", "muted"),
+    $out("Delta compression using up to 8 threads", "muted"),
+    $out("Compressing objects: 100% (3/3), done.", "muted"),
+    $out("Writing objects: 100% (3/3), 412 bytes | 412.00 KiB/s, done.", "muted"),
+    $out("Total 3 (delta 0), reused 0 (delta 0), pack-reused 0", "muted"),
+    $out("To github.com:OWNER/my-landing-site.git", "muted"),
+    $out("   3d2e1f0..a1b2c3d  main -> main", "success"),
+  ),
+];
+
+TERMINAL_SCRIPTS["push-remote"] = [
+  $cmd("git remote -v",
+    $out("origin\\tgit@github.com:OWNER/my-landing-site.git (fetch)"),
+    $out("origin\\tgit@github.com:OWNER/my-landing-site.git (push)"),
+  ),
+];
+
+L("pull", "Beginner", "Pulling updates from GitHub", "4 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>You push when you have changes to send up. You <strong>pull</strong> when changes have happened on GitHub that you don't have yet — usually because someone else (your developer, a teammate) pushed them.</p>
+
+    <h2>Pull = fetch + merge</h2>
+    <p>Under the hood, <code>git pull</code> does two things in one shot:</p>
+    <ol>
+      <li><strong>Fetch</strong> — download any new commits from GitHub.</li>
+      <li><strong>Merge</strong> — combine them into your local branch.</li>
+    </ol>
+
+    ${term("pull-demo")}
+
+    <p>The "Fast-forward" bit means: your branch had no new commits of its own, so Git could just move your "you are here" pointer forward to include the new commits. Clean and simple.</p>
+
+    <h2>When pulling gets interesting</h2>
+    <p>If you've made local commits <em>and</em> someone else pushed commits, Git has to combine the two histories. Usually that's automatic. But occasionally both sides changed the same line of the same file, and Git can't decide who's right — that's a <em>merge conflict</em>, which has a whole lesson dedicated to it later (under Intermediate).</p>
+
+    <div class="callout info">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        A good habit
+      </div>
+      <div class="callout-body">
+        <p>Always <code>git pull</code> <strong>before</strong> you start working in the morning. It catches you up on anything that changed overnight, so you're not making changes against an outdated copy.</p>
+      </div>
+    </div>
+
+    <h2>What about "git fetch"?</h2>
+    <p><code>git fetch</code> is the same as pull, minus the merge step. It downloads new commits but doesn't apply them to your branch yet. Useful when you want to see what changed before incorporating it, but day-to-day you can stick with <code>git pull</code>.</p>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li><code>git pull</code> downloads new commits from GitHub and merges them into your branch.</li>
+        <li>Pull before you start working to stay in sync.</li>
+        <li>Push at the end. Pull at the start. Repeat.</li>
+      </ul>
+    </div>
+  `);
+});
+
+TERMINAL_SCRIPTS["pull-demo"] = [
+  $note("teammate pushed a new commit while you were away"),
+  $cmd("git pull",
+    $out("remote: Enumerating objects: 4, done.", "muted"),
+    $out("remote: Counting objects: 100% (4/4), done.", "muted"),
+    $out("remote: Total 2 (delta 1), reused 2 (delta 1), pack-reused 0", "muted"),
+    $out("Unpacking objects: 100% (2/2), 304 bytes, done.", "muted"),
+    $out("From github.com:OWNER/my-landing-site"),
+    $out("   a1b2c3d..f4e5d6a  main       -> origin/main", "hunk"),
+    $out("Updating a1b2c3d..f4e5d6a"),
+    $out("Fast-forward", "success"),
+    $out(" pricing.html | 4 ++--"),
+    $out(" 1 file changed, 2 insertions(+), 2 deletions(-)"),
+  ),
+];
+
+L("gitignore", "Beginner", ".gitignore: keeping junk out", "4 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Not every file in a project folder should be committed. Compiled output, dependency folders, system files, secrets — these don't belong in the repo. <code>.gitignore</code> is how you tell Git to ignore them.</p>
+
+    <h2>What it looks like</h2>
+    <p><code>.gitignore</code> is a plain text file at the root of your repo. Each line is a pattern; anything matching the pattern is invisible to Git.</p>
+
+    ${term("gitignore-view")}
+
+    <h2>What to ignore (and why)</h2>
+    <ul>
+      <li><code>node_modules/</code> — JavaScript dependency folder. Often hundreds of megabytes. Re-generated by running <code>npm install</code>, so there's no reason to commit it.</li>
+      <li><code>.env</code>, <code>.env.local</code> — environment-variable files, often containing API keys and passwords. <strong>Never commit these.</strong></li>
+      <li><code>.DS_Store</code> — macOS junk file. Pure noise.</li>
+      <li><code>build/</code>, <code>dist/</code> — compiled output. Generated from the source, so there's no reason to track the generated artifacts.</li>
+      <li><code>*.log</code> — log files. Useful for debugging on the spot; meaningless to keep in history.</li>
+    </ul>
+
+    <h2>Testing it works</h2>
+    <p>After adding a pattern to <code>.gitignore</code>, run <code>git status</code> — the ignored files shouldn't appear in the list anymore.</p>
+
+    ${term("gitignore-test")}
+
+    <div class="callout danger">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Secrets are forever
+      </div>
+      <div class="callout-body">
+        <p>If you commit a file with passwords or API keys and push it, those secrets are <strong>permanently in the repo's history</strong>, even if you delete the file in the next commit. The right move is to immediately rotate (regenerate) the leaked key and treat it as compromised. Add it to <code>.gitignore</code> <em>before</em> creating the file.</p>
+      </div>
+    </div>
+
+    <h2>Templates exist for every language</h2>
+    <p>GitHub maintains a giant collection of starter <code>.gitignore</code> files at <a href="https://github.com/github/gitignore">github.com/github/gitignore</a>. Copy the one for your language (Node, Python, Ruby, etc.) and customize from there.</p>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li><code>.gitignore</code> lives at the root of the repo and lists files Git should pretend don't exist.</li>
+        <li>Always ignore: secrets, dependencies, compiled output, system junk.</li>
+        <li>Add patterns <em>before</em> creating the files where possible — once a secret is committed and pushed, treat it as leaked.</li>
+      </ul>
+    </div>
+  `);
+});
+
+TERMINAL_SCRIPTS["gitignore-view"] = [
+  $cmd("cat .gitignore",
+    $out("# dependencies", "muted"),
+    $out("node_modules/"),
+    $blank(),
+    $out("# build output", "muted"),
+    $out("dist/"),
+    $out("build/"),
+    $blank(),
+    $out("# environment variables (NEVER commit these)", "muted"),
+    $out(".env"),
+    $out(".env.local"),
+    $blank(),
+    $out("# system files", "muted"),
+    $out(".DS_Store"),
+    $out("Thumbs.db"),
+    $blank(),
+    $out("# logs", "muted"),
+    $out("*.log"),
+  ),
+];
+
+TERMINAL_SCRIPTS["gitignore-test"] = [
+  $note("create a fake .env file to test"),
+  $cmd('echo "SECRET_API_KEY=abc123" > .env'),
+  $cmd("git status",
+    $out("On branch main"),
+    $out("Your branch is up to date with 'origin/main'."),
+    $blank(),
+    $out("nothing to commit, working tree clean", "success"),
+    $note("the .env file is hidden — .gitignore worked"),
+  ),
+];
+</script>
+
+<script>
+L("branches", "Intermediate", "Branches: working without breaking anything", "6 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Until now, every commit you made went straight onto the <code>main</code> branch — the official, live version of the project. That's fine when you're alone and the project is tiny. Once anyone else is involved, or once changes take more than a few minutes, you want <strong>branches</strong>.</p>
+
+    <h2>The branching workflow</h2>
+    <p>The standard pattern is:</p>
+    <ol>
+      <li>Start a new branch off main (e.g. <code>feature/contact-form</code>).</li>
+      <li>Do all your work on that branch — commit as much as you want.</li>
+      <li>When the work is finished and tested, merge the branch back into main.</li>
+      <li>Delete the branch — it's served its purpose.</li>
+    </ol>
+
+    <div class="branch-diagram"><span class="bd-main">main</span>             ●─────●─────●─────●─────●  <span class="bd-label">← live site</span>
+                          \\                    /
+<span class="bd-feat">feature/contact</span>          ●─────●─────●
+
+(branch off, do work, merge back in)</div>
+
+    <p>The huge advantage: <strong>main always works</strong>. Even if your branch is broken, half-finished, or experimental, the live site keeps running off main. You only merge in when the branch is ready.</p>
+
+    <h2>Create a branch and switch to it</h2>
+    <p>One command does both at once:</p>
+
+    ${term("branch-create")}
+
+    <p><code>git switch -c</code> means "create a new branch (<code>-c</code>) and switch to it." The <code>-c</code> is just for creating; if the branch already exists, drop the <code>-c</code>:</p>
+
+    ${term("branch-switch")}
+
+    <h2>See what branches exist</h2>
+
+    ${term("branch-list")}
+
+    <p>The asterisk shows which one you're currently on.</p>
+
+    <h2>Branch naming</h2>
+    <p>Conventions vary, but a popular one:</p>
+    <ul>
+      <li><code>feature/&lt;short-description&gt;</code> for new functionality</li>
+      <li><code>fix/&lt;short-description&gt;</code> for bug fixes</li>
+      <li><code>chore/&lt;short-description&gt;</code> for housekeeping (dependency upgrades, refactors)</li>
+    </ul>
+
+    <p>Use hyphens, lowercase, keep it short. <code>feature/contact-form</code> beats <code>my-new-branch-for-the-contact-form-feature</code>.</p>
+
+    <h2>Push the branch up to GitHub</h2>
+    <p>The first time you push a new branch, you tell GitHub it exists with <code>-u origin &lt;branch-name&gt;</code> (the <code>-u</code> sets up the tracking link so future pushes are just <code>git push</code>):</p>
+
+    ${term("branch-push")}
+
+    <p>Now the branch is visible on GitHub — and on the repo's web page, you'll see a yellow banner inviting you to open a Pull Request from it. That's the topic of the next two lessons.</p>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>A branch is a parallel line of work. Use one per task.</li>
+        <li><code>git switch -c &lt;name&gt;</code> creates and switches in one go.</li>
+        <li><code>git branch</code> lists branches; the asterisk shows where you are.</li>
+        <li>First push of a new branch: <code>git push -u origin &lt;name&gt;</code>. After that, just <code>git push</code>.</li>
+        <li><strong>main always works.</strong> Experimental and half-finished stuff stays on branches until ready.</li>
+      </ul>
+    </div>
+  `);
+});
+
+TERMINAL_SCRIPTS["branch-create"] = [
+  $cmd("git switch -c feature/contact-form",
+    $out("Switched to a new branch 'feature/contact-form'", "success"),
+  ),
+];
+
+TERMINAL_SCRIPTS["branch-switch"] = [
+  $note("switching back to main"),
+  $cmd("git switch main",
+    $out("Switched to branch 'main'", "success"),
+    $out("Your branch is up to date with 'origin/main'."),
+  ),
+];
+
+TERMINAL_SCRIPTS["branch-list"] = [
+  $cmd("git branch",
+    $out("  feature/contact-form"),
+    $out("* main", "bold"),
+  ),
+];
+
+TERMINAL_SCRIPTS["branch-push"] = [
+  $cmd("git switch feature/contact-form",
+    $out("Switched to branch 'feature/contact-form'", "success"),
+  ),
+  $note("...work happens here, commits get made..."),
+  $cmd("git push -u origin feature/contact-form",
+    $out("Enumerating objects: 7, done.", "muted"),
+    $out("Counting objects: 100% (7/7), done.", "muted"),
+    $out("Writing objects: 100% (4/4), 612 bytes, done.", "muted"),
+    $out("remote: ", "muted"),
+    $out("remote: Create a pull request for 'feature/contact-form' on GitHub by visiting:", "hunk"),
+    $out("remote:      https://github.com/OWNER/my-landing-site/pull/new/feature/contact-form", "hunk"),
+    $out("remote: ", "muted"),
+    $out("To github.com:OWNER/my-landing-site.git", "muted"),
+    $out(" * [new branch]      feature/contact-form -> feature/contact-form", "success"),
+  ),
+];
+
+L("merge", "Intermediate", "Merging branches", "5 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Once a branch's work is done, it needs to come back into main. That's <strong>merging</strong>. Most of the time you'll merge through a Pull Request on GitHub (next lesson) — but it's important to understand what the underlying Git operation actually does.</p>
+
+    <h2>Mechanical example</h2>
+    <p>Let's say you finished <code>feature/contact-form</code> and want to merge it into main. Switch to the branch you're merging <em>into</em>, then run <code>git merge</code>:</p>
+
+    ${term("merge-fast-forward")}
+
+    <p>"Fast-forward" means main hadn't moved since your branch started, so Git could just slide the main pointer forward to include your commits. Cleanest possible merge.</p>
+
+    <h2>When main moved too: the "merge commit"</h2>
+    <p>If main got new commits while you were working on your branch, the histories have diverged. Git can still merge them, but it creates a special <em>merge commit</em> that ties the two lines back together:</p>
+
+    ${term("merge-commit")}
+
+    <p>Both kinds of merge are fine; both leave you with main containing all the work from your branch.</p>
+
+    <h2>Clean up after merging</h2>
+    <p>Branches are cheap. Once a feature branch is merged, delete it. Keeps things tidy:</p>
+
+    ${term("merge-cleanup")}
+
+    <div class="callout warn">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        In practice, you'll rarely merge locally
+      </div>
+      <div class="callout-body">
+        <p>Teams almost always merge through Pull Requests on GitHub instead. That gives you code review, automated tests, and a record of the discussion. We cover that in the next lesson.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li><code>git merge &lt;branch&gt;</code> brings another branch's commits into your current branch.</li>
+        <li>Fast-forward = clean line; merge commit = histories diverged and Git tied them back together.</li>
+        <li>Delete merged branches with <code>git branch -d &lt;name&gt;</code> locally and <code>git push origin --delete &lt;name&gt;</code> on GitHub.</li>
+      </ul>
+    </div>
+  `);
+});
+
+TERMINAL_SCRIPTS["merge-fast-forward"] = [
+  $cmd("git switch main", $out("Switched to branch 'main'", "success")),
+  $cmd("git merge feature/contact-form",
+    $out("Updating a1b2c3d..9c8b7a6"),
+    $out("Fast-forward", "success"),
+    $out(" contact.html | 28 ++++++++++++++++++++++++++++"),
+    $out(" styles.css   |  4 ++++"),
+    $out(" 2 files changed, 32 insertions(+)"),
+  ),
+];
+
+TERMINAL_SCRIPTS["merge-commit"] = [
+  $cmd("git merge feature/contact-form",
+    $out("Merge made by the 'ort' strategy.", "hunk"),
+    $out(" contact.html | 28 ++++++++++++++++++++++++++++"),
+    $out(" styles.css   |  4 ++++"),
+    $out(" 2 files changed, 32 insertions(+)"),
+    $note("git opened your editor with a default merge message — save and exit to finish"),
+  ),
+];
+
+TERMINAL_SCRIPTS["merge-cleanup"] = [
+  $cmd("git branch -d feature/contact-form",
+    $out("Deleted branch feature/contact-form (was 9c8b7a6).", "success"),
+  ),
+  $note("delete the branch on GitHub too"),
+  $cmd("git push origin --delete feature/contact-form",
+    $out("To github.com:OWNER/my-landing-site.git", "muted"),
+    $out(" - [deleted]         feature/contact-form", "success"),
+  ),
+];
+
+L("conflicts", "Intermediate", "Resolving merge conflicts", "7 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Sooner or later, you'll see this message:</p>
+
+    <div class="terminal" style="margin-bottom:18px;">
+      <div class="terminal-head">
+        <div class="terminal-dots"><span></span><span></span><span></span></div>
+        <div class="terminal-title">bash</div>
+      </div>
+      <div class="terminal-body">
+<span class="term-out">Auto-merging contact.html</span>
+<span class="term-out err">CONFLICT (content): Merge conflict in contact.html</span>
+<span class="term-out warn">Automatic merge failed; fix conflicts and then commit the result.</span>
+      </div>
+    </div>
+
+    <p>Don't panic. A merge conflict means Git found a spot where two branches both changed the same lines, and it can't tell which version you want. It's asking you to pick.</p>
+
+    <h2>What the conflict markers look like</h2>
+    <p>When you open the conflicted file, you'll see something like this:</p>
+
+    <div class="terminal" style="margin-bottom:18px;">
+      <div class="terminal-head">
+        <div class="terminal-dots"><span></span><span></span><span></span></div>
+        <div class="terminal-title">contact.html</div>
+      </div>
+      <div class="terminal-body">
+<span class="term-out">&lt;h1&gt;Get in touch&lt;/h1&gt;</span>
+<span class="term-out err">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
+<span class="term-out added">&lt;p&gt;We respond within 24 hours.&lt;/p&gt;</span>
+<span class="term-out muted">=======</span>
+<span class="term-out hunk">&lt;p&gt;Email us anytime at hello@example.com.&lt;/p&gt;</span>
+<span class="term-out err">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/contact-form</span>
+<span class="term-out">&lt;form&gt;...&lt;/form&gt;</span>
+      </div>
+    </div>
+
+    <p>Read it like this:</p>
+    <ul>
+      <li>Everything between <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code> and <code>=======</code> is the version on your current branch.</li>
+      <li>Everything between <code>=======</code> and <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/contact-form</code> is the version from the branch you're merging in.</li>
+    </ul>
+
+    <h2>How to resolve it</h2>
+    <p>Edit the file directly. Delete the markers. Keep whichever version is correct — or combine the two. End up with what the file <em>should</em> look like after the merge:</p>
+
+    <div class="terminal" style="margin-bottom:18px;">
+      <div class="terminal-head">
+        <div class="terminal-dots"><span></span><span></span><span></span></div>
+        <div class="terminal-title">contact.html (after editing)</div>
+      </div>
+      <div class="terminal-body">
+<span class="term-out">&lt;h1&gt;Get in touch&lt;/h1&gt;</span>
+<span class="term-out added">&lt;p&gt;Email us anytime at hello@example.com. We respond within 24 hours.&lt;/p&gt;</span>
+<span class="term-out">&lt;form&gt;...&lt;/form&gt;</span>
+      </div>
+    </div>
+
+    <p>Then stage and commit:</p>
+
+    ${term("conflict-resolve")}
+
+    <p>That's it. The merge is complete. Git is happy.</p>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8V18h6v-1.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg>
+        Conflicts are not failures
+      </div>
+      <div class="callout-body">
+        <p>A merge conflict isn't Git breaking. It's Git being honest: "Two people changed the same line, and I can't read minds." The right person to resolve it is whoever understands what the file <em>should</em> say — often that's a brief chat with whoever wrote the other change.</p>
+      </div>
+    </div>
+
+    <h2>If you panic, abort</h2>
+    <p>If you started a merge and want to back out completely, no harm done:</p>
+
+    ${term("conflict-abort")}
+
+    <p>This undoes the merge and returns the repo to exactly the state it was in before you ran <code>git merge</code>.</p>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>A conflict happens when two branches edited the same lines. Git asks you to pick.</li>
+        <li>Edit the file to remove the <code>&lt;&lt;&lt;</code>/<code>===</code>/<code>&gt;&gt;&gt;</code> markers and leave the correct final content.</li>
+        <li><code>git add</code> + <code>git commit</code> completes the merge.</li>
+        <li><code>git merge --abort</code> bails out cleanly if you change your mind.</li>
+      </ul>
+    </div>
+  `);
+});
+
+TERMINAL_SCRIPTS["conflict-resolve"] = [
+  $cmd("git status",
+    $out("On branch main"),
+    $out("You have unmerged paths.", "warn"),
+    $out("  (fix conflicts and run \"git commit\")", "muted"),
+    $out("  (use \"git merge --abort\" to abort the merge)", "muted"),
+    $blank(),
+    $out("Unmerged paths:", "warn"),
+    $out("  (use \"git add <file>...\" to mark resolution)", "muted"),
+    $out("\\tboth modified:   contact.html", "removed"),
+  ),
+  $note("after editing contact.html to remove the markers..."),
+  $cmd("git add contact.html"),
+  $cmd("git commit",
+    $out("[main 4e5f6a7] Merge branch 'feature/contact-form'", "success"),
+  ),
+];
+
+TERMINAL_SCRIPTS["conflict-abort"] = [
+  $cmd("git merge --abort"),
+  $cmd("git status",
+    $out("On branch main"),
+    $out("nothing to commit, working tree clean", "success"),
+  ),
+];
+
+L("pull-requests", "Intermediate", "Pull Requests on GitHub", "7 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>A <strong>Pull Request</strong> (PR) is the GitHub way of merging a branch — but with discussion, code review, and (optionally) automated checks in between. It's where collaboration actually happens.</p>
+
+    <h2>The flow</h2>
+    <ol>
+      <li>Push your branch to GitHub (last lesson).</li>
+      <li>Open a PR: "I'd like to merge <code>feature/contact-form</code> into <code>main</code>."</li>
+      <li>Teammates review the changes, leave comments, request edits.</li>
+      <li>You push more commits to the branch — they automatically show up in the PR.</li>
+      <li>Once everyone approves (and any automated tests pass), click <strong>Merge</strong>.</li>
+    </ol>
+
+    <h2>Opening a PR</h2>
+    <p>On the repo page, GitHub shows a yellow banner after you push a branch. Click <em>Compare & pull request</em>. You land on a form:</p>
+
+    <div class="gh-mock">
+      <div class="gh-mock-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>
+        Open a pull request &nbsp; <span style="color: var(--text-3); font-size: 11.5px;">base: main ← compare: feature/contact-form</span>
+      </div>
+      <div class="gh-mock-body">
+        <p style="margin-top:0;"><strong>Title:</strong> Add contact form to homepage</p>
+        <p style="line-height:1.7;"><strong>Description</strong></p>
+        <div style="background: var(--bg); border: 1px solid var(--border); padding: 10px 12px; border-radius: 6px; font-family: var(--mono); font-size: 12.5px; color: var(--text-2); line-height: 1.6;">## What this changes<br/>Adds a contact form to the homepage with name, email, and message fields.<br/><br/>## How to test<br/>1. Open the homepage<br/>2. Scroll to the bottom<br/>3. Submit the form — should show a "thanks" message<br/><br/>Closes #14</div>
+        <p style="margin: 12px 0 4px;"><strong>Reviewers:</strong> @amelia &nbsp; <strong>Labels:</strong> <span class="badge feat">feature</span></p>
+      </div>
+    </div>
+
+    <p>A good PR description has three things: <em>what</em> it changes, <em>how to test it</em>, and any <em>context</em> (a related issue, screenshots, design link). "<code>Closes #14</code>" tells GitHub: when this PR merges, automatically close issue #14.</p>
+
+    <h2>The PR page itself</h2>
+    <p>After you open the PR, you land on its discussion page. The four tabs at the top are the important ones:</p>
+    <ul>
+      <li><strong>Conversation</strong> — comments, status checks, merge button.</li>
+      <li><strong>Commits</strong> — every commit on the branch.</li>
+      <li><strong>Checks</strong> — automated tests (we'll cover these in the GitHub Actions lesson).</li>
+      <li><strong>Files changed</strong> — the diff. This is where reviewers spend most of their time.</li>
+    </ul>
+
+    <h2>The merge button</h2>
+    <p>At the bottom of the Conversation tab, three merge options:</p>
+    <ul>
+      <li><strong>Create a merge commit</strong> — default. Adds a "merge commit" tying the branch back into main, preserving the history.</li>
+      <li><strong>Squash and merge</strong> — collapses every commit on the branch into one tidy commit on main. Most teams prefer this for feature branches: it keeps main's history readable.</li>
+      <li><strong>Rebase and merge</strong> — replays the branch's commits on top of main as if they were always there. Cleanest line, but rewrites history. Use when the team has agreed.</li>
+    </ul>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8V18h6v-1.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg>
+        For a non-developer
+      </div>
+      <div class="callout-body">
+        <p>You don't need to merge PRs yourself — but you should be able to <em>read</em> them. Open the <em>Files changed</em> tab and you'll see red lines (removed) and green lines (added). Even without writing code, that diff tells you what your developer is changing and you can ask questions inline.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>A Pull Request is GitHub's merge-with-discussion-and-review wrapper around a branch.</li>
+        <li>Good PR descriptions answer: what, how to test, why (or link to the related issue).</li>
+        <li><strong>Squash and merge</strong> is the most common pattern — it keeps main's history clean.</li>
+        <li>Reading PRs is a non-developer superpower: you see exactly what's changing before it goes live.</li>
+      </ul>
+    </div>
+  `);
+});
+
+L("code-review", "Intermediate", "Reviewing code and approving PRs", "6 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Code review is where a teammate looks at your PR before it merges. It catches bugs, spreads knowledge, and keeps quality high. Even when you're the non-developer hiring someone, you can (and should) participate.</p>
+
+    <h2>The Files changed tab</h2>
+    <p>This is the reviewer's main view. Every change in the PR is shown as a <strong>diff</strong>: removed lines in red, added lines in green, context lines uncoloured. A small file might look like:</p>
+
+    <div class="terminal" style="margin-bottom:18px;">
+      <div class="terminal-head">
+        <div class="terminal-dots"><span></span><span></span><span></span></div>
+        <div class="terminal-title">homepage.html — diff</div>
+      </div>
+      <div class="terminal-body">
+<span class="term-out hunk">@@ -42,6 +42,11 @@ </span><span class="term-out muted">&lt;footer&gt;</span>
+<span class="term-out">    &lt;p&gt;&copy; 2026 My Company&lt;/p&gt;</span>
+<span class="term-out">  &lt;/footer&gt;</span>
+<span class="term-out added">+ &lt;section id="contact"&gt;</span>
+<span class="term-out added">+   &lt;h2&gt;Get in touch&lt;/h2&gt;</span>
+<span class="term-out added">+   &lt;form action="/submit"&gt;</span>
+<span class="term-out added">+     &lt;!-- name, email, message inputs --&gt;</span>
+<span class="term-out added">+   &lt;/form&gt;</span>
+<span class="term-out added">+ &lt;/section&gt;</span>
+<span class="term-out">&lt;/body&gt;</span>
+      </div>
+    </div>
+
+    <p>The <code>@@ -42,6 +42,11 @@</code> bit is the <em>hunk header</em>: "this change starts around line 42; the old version had 6 lines, the new one has 11."</p>
+
+    <h2>Leaving feedback</h2>
+    <p>Hover over any line and click the blue <strong>+</strong> icon — a comment box opens right there. Your comment will be anchored to that exact line. You can:</p>
+    <ul>
+      <li><strong>Add single comment</strong> — posts immediately as a one-off note.</li>
+      <li><strong>Start a review</strong> — queue up multiple comments and send them as a batch at the end (better — avoids spamming the author with notifications).</li>
+      <li><strong>Suggest a change</strong> — propose specific replacement text the author can apply with one click.</li>
+    </ul>
+
+    <h2>Finishing the review</h2>
+    <p>At the top right of Files changed, click <strong>Review changes</strong>. Three options:</p>
+    <ul>
+      <li><strong>Comment</strong> — leave thoughts without explicitly approving or rejecting.</li>
+      <li><strong>Approve</strong> — green check. "Looks good, ship it."</li>
+      <li><strong>Request changes</strong> — red X. "Needs work before merging." The author has to push fixes before you can approve.</li>
+    </ul>
+
+    <h2>Etiquette</h2>
+    <ul>
+      <li><strong>Be specific.</strong> "This will break on Safari because it doesn't support that feature" beats "this looks wrong."</li>
+      <li><strong>Suggest, don't dictate.</strong> Phrase comments as questions or proposals ("Could we use X here instead?") unless something is plainly broken.</li>
+      <li><strong>Approve when you mean it.</strong> Rubber-stamping is worse than no review at all.</li>
+      <li><strong>Praise good work.</strong> "Nice clean refactor" matters. People underestimate this.</li>
+    </ul>
+
+    <div class="callout info">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        What a non-developer can usefully review
+      </div>
+      <div class="callout-body">
+        <p>You can't always evaluate code correctness, but you can check: Does the PR match what we discussed? Are the file names sensible? Is the description clear? Did the automated checks pass? Is there a screenshot if it's a UI change? Those alone catch a lot of mis-communications.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>The <em>Files changed</em> tab shows red (removed) and green (added) lines — the diff.</li>
+        <li>Comments anchor to specific lines. <strong>Start a review</strong> bundles comments before sending.</li>
+        <li>Three review verdicts: Comment, Approve, Request changes.</li>
+        <li>Specific, constructive comments — and praise — make reviews a team-building tool, not a chore.</li>
+      </ul>
+    </div>
+  `);
+});
+</script>
+
+<script>
+L("rebase", "Advanced", "Rebase vs merge", "6 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Both <code>merge</code> and <code>rebase</code> combine two branches. They produce the same files at the end — but the <em>history</em> looks different. Knowing when to use which is a small but real skill.</p>
+
+    <h2>What rebase does</h2>
+    <p>Imagine main has moved on while you were working on your branch. With <code>merge</code>, Git ties the two histories together with a merge commit. With <code>rebase</code>, Git pretends your branch was started <em>right now</em> instead of when you actually branched off — it replays your commits on top of the latest main.</p>
+
+    <div class="branch-diagram"><span class="bd-label">BEFORE rebase</span>
+
+<span class="bd-main">main</span>      A───B───C───D
+                  \\
+<span class="bd-feat">feature</span>          X───Y───Z
+
+<span class="bd-label">AFTER  git rebase main</span>  (run while on feature)
+
+<span class="bd-main">main</span>      A───B───C───D
+                              \\
+<span class="bd-feat">feature</span>                      X'───Y'───Z'</div>
+
+    <p>Notice the apostrophes: <code>X'</code>, <code>Y'</code>, <code>Z'</code>. These are <em>new</em> commits — same changes, but built on top of main's new tip. Rebase rewrites history.</p>
+
+    <h2>The command</h2>
+
+    ${term("rebase-demo")}
+
+    <p>If there's a conflict during the rebase, you fix it the same way as a merge conflict, then run <code>git rebase --continue</code>.</p>
+
+    <h2>When to use which</h2>
+    <ul>
+      <li><strong>Merge</strong> when you want to preserve the truth of what happened, including the fact that two lines of work existed in parallel. Default choice for combining feature branches via Pull Requests.</li>
+      <li><strong>Rebase</strong> when you want a clean, linear history — and the branch is yours alone. Common before opening a PR, to put your branch on top of latest main so the diff is small.</li>
+    </ul>
+
+    <div class="callout danger">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Never rebase a shared branch
+      </div>
+      <div class="callout-body">
+        <p>If anyone else has pulled your branch, rebasing will rewrite the commits and confuse Git on their end. Rule of thumb: only rebase branches that <strong>you</strong> have pushed, and that <strong>nobody else</strong> has pulled.</p>
+      </div>
+    </div>
+
+    <h2>Interactive rebase: editing your history</h2>
+    <p>The most powerful (and slightly dangerous) version is <code>git rebase -i</code> — "interactive" rebase. It lets you reorder, squash, or rename commits before pushing them. Useful for cleaning up a messy branch:</p>
+
+    ${term("rebase-interactive")}
+
+    <p>This opens an editor where each commit is on a line prefixed with <code>pick</code>. Change <code>pick</code> to <code>squash</code> to fold a commit into the one above it, <code>reword</code> to change its message, or rearrange the lines to reorder. Save, exit, done.</p>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li><strong>Merge</strong> ties branches together with a merge commit, preserving the truth.</li>
+        <li><strong>Rebase</strong> replays your commits on top of another branch — cleaner history, but rewrites commits.</li>
+        <li>Never rebase shared branches. Only rebase your own work that nobody else has pulled.</li>
+        <li><code>git rebase -i</code> lets you squash, reword, or reorder commits before sharing them.</li>
+      </ul>
+    </div>
+  `);
+});
+
+TERMINAL_SCRIPTS["rebase-demo"] = [
+  $cmd("git switch feature/contact-form", $out("Switched to branch 'feature/contact-form'", "success")),
+  $cmd("git fetch origin",
+    $out("From github.com:OWNER/my-landing-site"),
+    $out(" * branch            main       -> FETCH_HEAD", "muted"),
+  ),
+  $cmd("git rebase origin/main",
+    $out("Successfully rebased and updated refs/heads/feature/contact-form.", "success"),
+  ),
+];
+
+TERMINAL_SCRIPTS["rebase-interactive"] = [
+  $cmd("git rebase -i HEAD~3",
+    $note("HEAD~3 means \"the last 3 commits\""),
+    $out("opens your editor with:", "muted"),
+    $blank(),
+    $out("pick a1b2c3d Add empty contact form", "hunk"),
+    $out("pick f4e5d6a typo", "hunk"),
+    $out("pick 9c8b7a6 finish contact form styling", "hunk"),
+    $blank(),
+    $out("# Commands:", "muted"),
+    $out("# p, pick = use commit", "muted"),
+    $out("# r, reword = use commit, but edit message", "muted"),
+    $out("# s, squash = use commit, but meld into previous", "muted"),
+  ),
+];
+
+L("issues", "Advanced", "Issues, labels, milestones", "6 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Every repo has an <strong>Issues</strong> tab. Think of issues as a built-in bug tracker / to-do list / discussion board. They're how teams track everything that needs doing.</p>
+
+    <h2>What an issue looks like</h2>
+    <div class="gh-mock">
+      <div class="gh-mock-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Issues — my-landing-site &nbsp; <span style="color: var(--text-3); font-size: 11.5px; margin-left: auto;">5 Open &nbsp; 24 Closed</span>
+      </div>
+      <div class="gh-mock-body" style="padding: 0;">
+        <div class="pr-row">
+          <div class="pr-icon open">!</div>
+          <div class="pr-content">
+            <div class="pr-title">Contact form sends empty submissions <span class="badge bug">bug</span></div>
+            <div class="pr-meta">#37 opened 2 days ago by amelia — assigned to @dev-jordan</div>
+          </div>
+        </div>
+        <div class="pr-row">
+          <div class="pr-icon open">!</div>
+          <div class="pr-content">
+            <div class="pr-title">Add dark mode toggle <span class="badge feat">feature</span> <span class="badge help">help wanted</span></div>
+            <div class="pr-meta">#36 opened 5 days ago by USERNAME</div>
+          </div>
+        </div>
+        <div class="pr-row">
+          <div class="pr-icon open">!</div>
+          <div class="pr-content">
+            <div class="pr-title">Update FAQ copy for Q3 launch <span class="badge docs">docs</span></div>
+            <div class="pr-meta">#35 opened 1 week ago by USERNAME — milestone: Q3 launch</div>
+          </div>
+        </div>
+        <div class="pr-row">
+          <div class="pr-icon open">!</div>
+          <div class="pr-content">
+            <div class="pr-title">Set up Google Analytics <span class="badge good-first">good first issue</span></div>
+            <div class="pr-meta">#34 opened 1 week ago by USERNAME</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Anatomy of a good issue</h2>
+    <p>Three sections, every time:</p>
+    <ul>
+      <li><strong>What's wrong / what's needed</strong> — describe the symptom or the feature. Be specific.</li>
+      <li><strong>Steps to reproduce</strong> (for bugs) — exactly how to make the bug happen. Without this, the developer has to guess.</li>
+      <li><strong>Expected vs actual</strong> — what should happen vs what does happen.</li>
+    </ul>
+
+    <h2>Labels</h2>
+    <p>Labels are coloured tags that categorize issues. GitHub repos usually have:</p>
+    <ul>
+      <li><span class="badge bug">bug</span> — something broken</li>
+      <li><span class="badge feat">feature</span> / <span class="badge feat">enhancement</span> — new functionality</li>
+      <li><span class="badge docs">documentation</span> — needs writing or fixing in docs</li>
+      <li><span class="badge good-first">good first issue</span> — easy enough for a new contributor</li>
+      <li><span class="badge help">help wanted</span> — the maintainer welcomes outside help</li>
+    </ul>
+
+    <p>You can add as many labels as you want, and filter the issue list by them. <code>label:bug is:open</code> in the search bar shows every open bug.</p>
+
+    <h2>Milestones</h2>
+    <p>A <strong>milestone</strong> is a deadline-based group of issues. "Q3 launch" might be a milestone with 12 issues attached; as each issue closes, the milestone shows progress (e.g. 7 of 12 done). Great for tracking releases or sprints.</p>
+
+    <h2>Linking issues to PRs</h2>
+    <p>If a PR description contains a phrase like <code>Closes #37</code>, <code>Fixes #14</code>, or <code>Resolves #22</code>, then when the PR merges, GitHub automatically closes that issue. This is the magic glue: open an issue, do the work in a PR that references the issue, merge the PR, issue closes itself.</p>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>Issues are the built-in tracker for bugs, features, and tasks.</li>
+        <li>Good issues are specific: what's wrong, how to reproduce, what was expected.</li>
+        <li>Labels categorize. Milestones group toward a deadline.</li>
+        <li><code>Closes #N</code> in a PR auto-closes issue N when the PR merges.</li>
+      </ul>
+    </div>
+  `);
+});
+
+L("projects", "Advanced", "GitHub Projects — Kanban boards", "5 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Issues are great individually, but you also need a way to see <em>everything</em> in flight. That's <strong>GitHub Projects</strong> — a built-in Kanban board (and table view, and roadmap view) that pulls issues and PRs from across your repos.</p>
+
+    <h2>What a board looks like</h2>
+    <div class="gh-mock">
+      <div class="gh-mock-head">
+        <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        Project: Q3 launch
+      </div>
+      <div class="gh-mock-body" style="padding: 14px;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+          <div style="background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px; padding: 10px;">
+            <div style="font-size: 11.5px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">To do · 3</div>
+            <div style="background: var(--bg-1); border: 1px solid var(--border); border-radius: 5px; padding: 8px; margin-bottom: 6px; font-size: 12.5px;">#34 Set up Google Analytics</div>
+            <div style="background: var(--bg-1); border: 1px solid var(--border); border-radius: 5px; padding: 8px; margin-bottom: 6px; font-size: 12.5px;">#36 Add dark mode toggle</div>
+            <div style="background: var(--bg-1); border: 1px solid var(--border); border-radius: 5px; padding: 8px; font-size: 12.5px;">#38 Mobile menu</div>
+          </div>
+          <div style="background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px; padding: 10px;">
+            <div style="font-size: 11.5px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">In progress · 2</div>
+            <div style="background: var(--bg-1); border: 1px solid var(--border); border-radius: 5px; padding: 8px; margin-bottom: 6px; font-size: 12.5px;">#37 Fix contact form bug</div>
+            <div style="background: var(--bg-1); border: 1px solid var(--border); border-radius: 5px; padding: 8px; font-size: 12.5px;">#39 Pricing page redesign</div>
+          </div>
+          <div style="background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px; padding: 10px;">
+            <div style="font-size: 11.5px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">Done · 4</div>
+            <div style="background: var(--bg-1); border: 1px solid var(--border); border-radius: 5px; padding: 8px; margin-bottom: 6px; font-size: 12.5px; opacity: 0.65;">#33 Footer links</div>
+            <div style="background: var(--bg-1); border: 1px solid var(--border); border-radius: 5px; padding: 8px; margin-bottom: 6px; font-size: 12.5px; opacity: 0.65;">#32 Hero copy</div>
+            <div style="background: var(--bg-1); border: 1px solid var(--border); border-radius: 5px; padding: 8px; font-size: 12.5px; opacity: 0.65;">#31 Logo update</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Creating one</h2>
+    <p>From your repo (or organization), click <strong>Projects → New project</strong>. Pick a template:</p>
+    <ul>
+      <li><strong>Kanban</strong> — the columns above (To do / In progress / Done).</li>
+      <li><strong>Table</strong> — spreadsheet view, great for sorting and filtering.</li>
+      <li><strong>Roadmap</strong> — timeline view with dates.</li>
+    </ul>
+
+    <p>You can switch views on the same project anytime — they're just different ways to look at the same underlying issues.</p>
+
+    <h2>Automation</h2>
+    <p>The big win is built-in automation. You can configure rules like:</p>
+    <ul>
+      <li>When an issue is added to the project, set status to <em>To do</em>.</li>
+      <li>When a PR linked to an issue is opened, move the issue to <em>In progress</em>.</li>
+      <li>When the PR merges, move the issue to <em>Done</em>.</li>
+    </ul>
+
+    <p>Set this up once and the board stays current on its own — no dragging cards around.</p>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8V18h6v-1.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg>
+        For a non-developer hiring out work
+      </div>
+      <div class="callout-body">
+        <p>This is your dashboard. One project board, three columns. You always know what's queued, what's being worked on, and what shipped — without having to ask. Make this the first thing you open in the morning.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>GitHub Projects = Kanban/table/roadmap views built on top of Issues and PRs.</li>
+        <li>Three default columns (To do, In progress, Done) work for most teams.</li>
+        <li>Automation rules can move cards based on PR status — no manual updating needed.</li>
+      </ul>
+    </div>
+  `);
+});
+
+L("collaboration", "Advanced", "Collaboration: @mentions, teams, CODEOWNERS", "5 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Once more than one person is involved, GitHub has a small set of tools that make collaboration feel natural rather than chaotic.</p>
+
+    <h2>@mentions</h2>
+    <p>Anywhere you can write text — issues, PR descriptions, review comments — typing <code>@username</code> notifies that person. They get an email and an inbox notification on GitHub.</p>
+
+    <p>Common uses:</p>
+    <ul>
+      <li><code>@amelia could you double-check the styling on mobile?</code></li>
+      <li><code>cc @dev-jordan — your PR from yesterday touches this same file</code></li>
+    </ul>
+
+    <h2>Assignees and reviewers</h2>
+    <p>On any issue or PR, you can set:</p>
+    <ul>
+      <li><strong>Assignees</strong> — who's responsible for getting it done (typically 1 person).</li>
+      <li><strong>Reviewers</strong> (PRs only) — who needs to look at it before it can merge.</li>
+    </ul>
+
+    <h2>Teams (organization repos)</h2>
+    <p>If your GitHub account is a single user, you can give access to specific people repo-by-repo (Settings → Collaborators). If you're on an <strong>organization</strong> account (free for small teams), you can group people into <em>teams</em>: <code>@my-org/designers</code>, <code>@my-org/engineering</code>. You can grant a whole team access to a repo at once, and you can <code>@</code>-mention a team to notify everyone in it.</p>
+
+    <h2>CODEOWNERS</h2>
+    <p>This is a power feature, worth knowing about. Put a file at <code>.github/CODEOWNERS</code> mapping file paths to people:</p>
+
+    <div class="terminal" style="margin-bottom:18px;">
+      <div class="terminal-head">
+        <div class="terminal-dots"><span></span><span></span><span></span></div>
+        <div class="terminal-title">.github/CODEOWNERS</div>
+      </div>
+      <div class="terminal-body">
+<span class="term-out muted"># Anything in /design needs Amelia's approval</span>
+<span class="term-out">/design/         @amelia</span>
+<span class="term-out muted"></span>
+<span class="term-out muted"># Anything in /src needs an engineer</span>
+<span class="term-out">/src/            @my-org/engineering</span>
+<span class="term-out muted"></span>
+<span class="term-out muted"># The marketing folder is the marketing team's</span>
+<span class="term-out">/marketing/      @my-org/marketing</span>
+      </div>
+    </div>
+
+    <p>Now whenever a PR touches a file matching one of those paths, GitHub <em>automatically</em> requests review from the right person or team. No more "who should approve this?" — it's already done.</p>
+
+    <div class="callout info">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Notifications without overwhelm
+      </div>
+      <div class="callout-body">
+        <p>GitHub's notifications can flood your inbox. Two things help: in <em>Settings → Notifications</em>, route most events to the in-app inbox instead of email; and "watch" only the repos you actually care about. You can mute the rest.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li><code>@username</code> in any text field pings that person.</li>
+        <li>Assignees own the work; reviewers approve it.</li>
+        <li>Teams (in organizations) let you group people and grant access in bulk.</li>
+        <li>CODEOWNERS auto-routes review requests based on which files a PR touches.</li>
+      </ul>
+    </div>
+  `);
+});
+
+L("actions-intro", "Advanced", "Intro to GitHub Actions", "6 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p><strong>GitHub Actions</strong> is GitHub's automation engine. It runs little scripts (called <em>workflows</em>) in response to events in your repo — when someone pushes a commit, opens a PR, creates a tag, schedules a time, etc. Think of it as IFTTT/Zapier built right into your codebase.</p>
+
+    <h2>What you can do with Actions</h2>
+    <ul>
+      <li>Run automated tests on every push, so broken code never makes it to main.</li>
+      <li>Deploy to a server (Netlify, Vercel, AWS, your own machine) when main updates.</li>
+      <li>Auto-label issues, close stale PRs, post Slack messages.</li>
+      <li>Build and publish releases.</li>
+      <li>Generate weekly reports.</li>
+    </ul>
+
+    <h2>How a workflow is defined</h2>
+    <p>A workflow is a YAML file in <code>.github/workflows/</code>. YAML is a simple key-value format — easy to read once you've seen one. Here's the simplest possible example:</p>
+
+    <div class="terminal" style="margin-bottom:18px;">
+      <div class="terminal-head">
+        <div class="terminal-dots"><span></span><span></span><span></span></div>
+        <div class="terminal-title">.github/workflows/hello.yml</div>
+      </div>
+      <div class="terminal-body">
+<span class="term-out hunk">name:</span><span class="term-out"> Say hello</span>
+<span class="term-out hunk">on:</span><span class="term-out"> push</span>
+
+<span class="term-out hunk">jobs:</span>
+<span class="term-out">  greet:</span>
+<span class="term-out">    runs-on: ubuntu-latest</span>
+<span class="term-out">    steps:</span>
+<span class="term-out">      - name: Print a message</span>
+<span class="term-out">        run: echo "Hello from GitHub Actions!"</span>
+      </div>
+    </div>
+
+    <p>Reading that:</p>
+    <ul>
+      <li><code>name</code> — what the workflow is called (shows up on the Actions tab).</li>
+      <li><code>on: push</code> — when to run it. Other options: <code>pull_request</code>, <code>schedule</code>, <code>workflow_dispatch</code> (manual trigger).</li>
+      <li><code>jobs</code> — what to do. <code>runs-on: ubuntu-latest</code> means "spin up a fresh Ubuntu Linux machine."</li>
+      <li><code>steps</code> — the commands to run on that machine.</li>
+    </ul>
+
+    <p>Commit this file, push, and on the Actions tab you'll see your workflow run on every push from then on.</p>
+
+    <h2>The Actions tab</h2>
+    <div class="gh-mock">
+      <div class="gh-mock-head">
+        <svg class="ico" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Actions — my-landing-site
+      </div>
+      <div class="gh-mock-body" style="padding: 0;">
+        <div class="pr-row">
+          <div class="pr-icon" style="background: var(--green);">✓</div>
+          <div class="pr-content">
+            <div class="pr-title">Say hello · #142</div>
+            <div class="pr-meta">main · 2m ago · 8 seconds</div>
+          </div>
+        </div>
+        <div class="pr-row">
+          <div class="pr-icon" style="background: var(--green);">✓</div>
+          <div class="pr-content">
+            <div class="pr-title">Say hello · #141</div>
+            <div class="pr-meta">feature/contact-form · 14m ago · 9 seconds</div>
+          </div>
+        </div>
+        <div class="pr-row">
+          <div class="pr-icon" style="background: var(--red);">✕</div>
+          <div class="pr-content">
+            <div class="pr-title">Say hello · #140</div>
+            <div class="pr-meta">main · 1h ago · failed in 12 seconds</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p>Click a run to see the logs — every step's output is captured, so when something fails you can see exactly why.</p>
+
+    <h2>The marketplace</h2>
+    <p>You don't have to write steps from scratch. The <a href="https://github.com/marketplace?type=actions">GitHub Actions Marketplace</a> has thousands of pre-built actions — "check out my code", "set up Node.js", "deploy to Vercel", "publish a release", "send a Slack message". You pull them in with <code>uses: someone/action-name@v3</code>.</p>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8V18h6v-1.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg>
+        Start small
+      </div>
+      <div class="callout-body">
+        <p>The temptation with Actions is to automate everything on day one and create a giant tangle. Don't. Add one workflow at a time, watch it run for a week, then add the next. Most teams need three: run tests, deploy on merge, and maybe send a notification when something breaks.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>Actions = automation that runs in response to events (push, PR, schedule).</li>
+        <li>Workflows are YAML files in <code>.github/workflows/</code>.</li>
+        <li>The Actions tab shows every run, success or failure, with full logs.</li>
+        <li>The Marketplace has pre-built actions you can drop in instead of writing scripts from scratch.</li>
+      </ul>
+    </div>
+  `);
+});
+
+L("ci", "Advanced", "Continuous Integration: tests on every push", "7 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p><strong>Continuous Integration</strong> (CI) is the most common use of Actions: automatically run the project's tests on every commit, so you catch broken code before it ships.</p>
+
+    <h2>The shape of a CI workflow</h2>
+    <p>For a typical Node.js project, the workflow looks like this:</p>
+
+    <div class="terminal" style="margin-bottom:18px;">
+      <div class="terminal-head">
+        <div class="terminal-dots"><span></span><span></span><span></span></div>
+        <div class="terminal-title">.github/workflows/ci.yml</div>
+      </div>
+      <div class="terminal-body">
+<span class="term-out hunk">name:</span><span class="term-out"> CI</span>
+
+<span class="term-out hunk">on:</span>
+<span class="term-out">  push:</span>
+<span class="term-out">    branches: [main]</span>
+<span class="term-out">  pull_request:</span>
+<span class="term-out">    branches: [main]</span>
+
+<span class="term-out hunk">jobs:</span>
+<span class="term-out">  test:</span>
+<span class="term-out">    runs-on: ubuntu-latest</span>
+<span class="term-out">    steps:</span>
+<span class="term-out">      - uses: actions/checkout@v4</span>
+<span class="term-out muted">        # ↑ pull down the repo's code onto the runner</span>
+
+<span class="term-out">      - uses: actions/setup-node@v4</span>
+<span class="term-out">        with:</span>
+<span class="term-out">          node-version: '20'</span>
+<span class="term-out muted">        # ↑ install Node.js v20</span>
+
+<span class="term-out">      - run: npm ci</span>
+<span class="term-out muted">        # ↑ install all dependencies (faster, stricter version of npm install)</span>
+
+<span class="term-out">      - run: npm test</span>
+<span class="term-out muted">        # ↑ actually run the tests</span>
+      </div>
+    </div>
+
+    <p>Reading top to bottom: every time someone pushes to main or opens a PR targeting main, GitHub spins up a fresh Ubuntu machine, checks out the code, installs Node.js 20, installs dependencies, and runs <code>npm test</code>. If the tests pass, the run is green. If they fail, the run is red.</p>
+
+    <h2>What it looks like on a PR</h2>
+    <p>On a Pull Request, you'll see CI status right next to the merge button:</p>
+
+    <div class="gh-mock">
+      <div class="gh-mock-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>
+        #42 Add contact form
+      </div>
+      <div class="gh-mock-body">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0;">
+          <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--green); color: #0a0a0a; display: grid; place-items: center; font-size: 11px; font-weight: 700;">✓</div>
+          <div><strong>All checks have passed</strong> <span style="color: var(--text-3); font-size: 12px;">— 1 successful check</span></div>
+        </div>
+        <div style="margin-left: 26px; font-size: 12.5px; color: var(--text-2);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--green);">✓</span> CI / test — Successful in 1m 34s
+          </div>
+        </div>
+        <div style="margin-top: 14px; padding: 10px 14px; background: var(--green-soft); border: 1px solid rgba(74,222,128,0.30); border-radius: 6px; color: var(--green); font-size: 13px;">
+          This branch has no conflicts with the base branch — Merging can be performed automatically.
+        </div>
+      </div>
+    </div>
+
+    <p>When tests fail, the PR shows red and (if the team configured it) the <strong>Merge</strong> button is disabled. The branch can't ship until it's green again. This is the rule that prevents the website from breaking.</p>
+
+    <h2>Branch protection rules</h2>
+    <p>To make CI actually mandatory, go to <strong>Settings → Branches → Add branch protection rule</strong> for <code>main</code>:</p>
+    <ul>
+      <li>☑ Require status checks to pass before merging</li>
+      <li>☑ Require pull request reviews before merging (1+ approvers)</li>
+      <li>☑ Require branches to be up to date before merging</li>
+    </ul>
+
+    <p>Now nobody (not even an admin, if you check that box) can push or merge into main without passing CI and getting an approval. This single setting protects you from 90% of "the website broke and we don't know why" situations.</p>
+
+    <h2>What "tests" actually means</h2>
+    <p>Even without writing code, you can ask your developer:</p>
+    <ul>
+      <li>"What does <code>npm test</code> actually run?"</li>
+      <li>"Do we have tests for the contact form?"</li>
+      <li>"What's our test coverage?" (a percentage — what fraction of the code is exercised by tests)</li>
+    </ul>
+
+    <p>Good developers welcome these questions. They're signs you care about quality.</p>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>CI = automatic tests on every push and PR.</li>
+        <li>A typical CI workflow: check out code → install dependencies → run tests.</li>
+        <li>Branch protection rules force PRs to pass CI before they can merge.</li>
+        <li>Red runs = broken. Green runs = safe to merge.</li>
+      </ul>
+    </div>
+  `);
+});
+
+L("undo", "Advanced", "Undoing mistakes: reset, revert, reflog", "7 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Git almost never actually loses your work. Once something has been committed, there's nearly always a way to get it back. The trick is knowing which "undo" command fits the situation.</p>
+
+    <h2>Three different "undos"</h2>
+    <table style="width:100%; border-collapse: collapse; margin: 14px 0; font-size: 13px;">
+      <thead>
+        <tr style="border-bottom: 1px solid var(--border);">
+          <th style="text-align:left; padding: 8px 4px; color: var(--text-3); font-weight: 600;">Command</th>
+          <th style="text-align:left; padding: 8px 4px; color: var(--text-3); font-weight: 600;">When to use</th>
+          <th style="text-align:left; padding: 8px 4px; color: var(--text-3); font-weight: 600;">Safe to share?</th>
+        </tr>
+      </thead>
+      <tbody style="color: var(--text);">
+        <tr style="border-bottom: 1px solid var(--border);"><td style="padding: 8px 4px;"><code>git restore</code></td><td style="padding: 8px 4px;">Throw away uncommitted changes to a file.</td><td style="padding: 8px 4px;">Yes (only affects your machine)</td></tr>
+        <tr style="border-bottom: 1px solid var(--border);"><td style="padding: 8px 4px;"><code>git revert</code></td><td style="padding: 8px 4px;">Undo a commit by adding a new commit that reverses it.</td><td style="padding: 8px 4px;"><strong style="color: var(--green);">Yes</strong></td></tr>
+        <tr><td style="padding: 8px 4px;"><code>git reset</code></td><td style="padding: 8px 4px;">Move the branch back as if a commit never happened. Rewrites history.</td><td style="padding: 8px 4px;"><strong style="color: var(--red);">Only if not pushed</strong></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Throwing away uncommitted changes</h2>
+    <p>You started editing a file, decided you don't want the changes. Easy:</p>
+
+    ${term("undo-restore")}
+
+    <h2>Reverting a commit that's already pushed</h2>
+    <p>A PR was merged, and it turns out it broke something. The clean fix is <code>git revert</code> — it creates a new commit that undoes the bad one:</p>
+
+    ${term("undo-revert")}
+
+    <p>The old commit still exists in history; you've added a new commit that cancels it out. This is the right move for shared branches.</p>
+
+    <h2>Resetting (the nuclear option)</h2>
+    <p><code>git reset</code> rewinds your branch pointer to an earlier commit, pretending later commits never happened. Powerful, but dangerous on shared branches.</p>
+
+    ${term("undo-reset")}
+
+    <p>If you've already pushed, you'd need <code>git push --force</code> after this — which rewrites GitHub's history and breaks things for anyone who already pulled. <strong>Reset is for unshared work only.</strong></p>
+
+    <h2>The reflog: your safety net</h2>
+    <p>This is the most reassuring command in Git. The <strong>reflog</strong> remembers every move HEAD has made — every commit, every branch switch, every reset — for the last 90 days. If you screwed something up, the reflog can almost always rescue you.</p>
+
+    ${term("undo-reflog")}
+
+    <p>Find the commit you want to recover, then check it out (or reset to it). Your "lost" work is back.</p>
+
+    <div class="callout info">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        When you think work is gone
+      </div>
+      <div class="callout-body">
+        <p>99% of the time, "I lost my work" really means "Git is showing me a different state and I don't know how to navigate back." Run <code>git reflog</code> first. Almost always the rescue is one line away.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li><code>git restore &lt;file&gt;</code> throws away uncommitted edits to that file.</li>
+        <li><code>git revert &lt;commit&gt;</code> safely undoes a commit on a shared branch.</li>
+        <li><code>git reset</code> rewinds history — only use on branches nobody else has pulled.</li>
+        <li><code>git reflog</code> is the time machine: it logs every move HEAD has made and lets you go back.</li>
+      </ul>
+    </div>
+  `);
+});
+
+TERMINAL_SCRIPTS["undo-restore"] = [
+  $note("you made a mess of pricing.html and want to scrap the changes"),
+  $cmd("git status",
+    $out("Changes not staged for commit:", "warn"),
+    $out("\\tmodified:   pricing.html", "removed"),
+  ),
+  $cmd("git restore pricing.html"),
+  $cmd("git status",
+    $out("nothing to commit, working tree clean", "success"),
+  ),
+];
+
+TERMINAL_SCRIPTS["undo-revert"] = [
+  $cmd("git log --oneline -3",
+    $out("a1b2c3d (HEAD -> main) Update pricing copy", "hunk"),
+    $out("9c8b7a6 Bad commit that broke contact form", "removed"),
+    $out("f4e5d6a Add About section"),
+  ),
+  $cmd("git revert 9c8b7a6",
+    $out("[main 4e5f6a7] Revert \"Bad commit that broke contact form\"", "success"),
+    $out(" 1 file changed, 4 insertions(+), 8 deletions(-)"),
+  ),
+  $cmd("git push",
+    $out("To github.com:OWNER/my-landing-site.git", "muted"),
+    $out("   a1b2c3d..4e5f6a7  main -> main", "success"),
+  ),
+];
+
+TERMINAL_SCRIPTS["undo-reset"] = [
+  $note("undo the last 2 commits, KEEP the changes as uncommitted edits"),
+  $cmd("git reset HEAD~2",
+    $out("Unstaged changes after reset:", "warn"),
+    $out("M\\tpricing.html"),
+    $out("M\\tcontact.html"),
+  ),
+  $note("HARD reset — undo commits AND discard the changes entirely. dangerous."),
+  $cmd("git reset --hard HEAD~2",
+    $out("HEAD is now at f4e5d6a Add About section", "warn"),
+  ),
+];
+
+TERMINAL_SCRIPTS["undo-reflog"] = [
+  $cmd("git reflog",
+    $out("f4e5d6a HEAD@{0}: reset: moving to HEAD~2"),
+    $out("a1b2c3d HEAD@{1}: commit: Update pricing copy", "hunk"),
+    $out("9c8b7a6 HEAD@{2}: commit: Bad commit that broke contact form"),
+    $out("f4e5d6a HEAD@{3}: commit: Add About section"),
+  ),
+  $note("oh no — I want a1b2c3d back. just reset to it."),
+  $cmd("git reset --hard a1b2c3d",
+    $out("HEAD is now at a1b2c3d Update pricing copy", "success"),
+  ),
+];
+
+L("stash-cherry", "Advanced", "Stash and cherry-pick", "5 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Two power-user commands you'll reach for occasionally: <code>stash</code> and <code>cherry-pick</code>. Both solve specific, common annoyances.</p>
+
+    <h2>git stash — pause your work</h2>
+    <p>You're in the middle of editing a feature when someone says "urgent: the live site is broken, please fix." You can't commit your half-finished work, and you can't switch branches with uncommitted changes (Git will refuse or carry them with you). <strong>Stash</strong> temporarily sets the changes aside so you can switch contexts cleanly.</p>
+
+    ${term("stash-demo")}
+
+    <p>Stashes are stored in a stack — you can stash multiple times and pop them back in order, or list and pick specifically.</p>
+
+    <h2>git cherry-pick — grab a single commit</h2>
+    <p>Someone made a commit on another branch that you also want on your branch, but you don't want the rest of that branch. <strong>Cherry-pick</strong> copies the commit over by itself:</p>
+
+    ${term("cherry-demo")}
+
+    <p>Useful when a hotfix lands on main and you want it on a release branch too — or when a colleague's branch has one commit that solves a problem you're hitting.</p>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8V18h6v-1.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg>
+        Both can conflict
+      </div>
+      <div class="callout-body">
+        <p>Popping a stash or cherry-picking can hit the same merge conflicts as a regular merge. The resolution process is identical: edit the conflicted file, remove the markers, <code>git add</code>, and then either <code>git stash drop</code> (if pop conflicted) or <code>git cherry-pick --continue</code> (if cherry-pick conflicted).</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li><code>git stash</code> tucks uncommitted changes away so you can switch contexts; <code>git stash pop</code> brings them back.</li>
+        <li><code>git cherry-pick &lt;commit&gt;</code> copies a single commit from another branch onto your current branch.</li>
+        <li>Both are situational — most days you won't need either, but when you do, nothing else does the job.</li>
+      </ul>
+    </div>
+  `);
+});
+
+TERMINAL_SCRIPTS["stash-demo"] = [
+  $cmd("git status",
+    $out("Changes not staged for commit:", "warn"),
+    $out("\\tmodified:   contact.html", "removed"),
+    $out("\\tmodified:   styles.css", "removed"),
+  ),
+  $cmd('git stash push -m "WIP contact form"',
+    $out("Saved working directory and index state On main: WIP contact form", "success"),
+  ),
+  $cmd("git status",
+    $out("nothing to commit, working tree clean", "success"),
+  ),
+  $note("...switch branches, fix the urgent thing, switch back..."),
+  $cmd("git stash list",
+    $out("stash@{0}: On main: WIP contact form"),
+  ),
+  $cmd("git stash pop",
+    $out("Changes not staged for commit:", "success"),
+    $out("\\tmodified:   contact.html"),
+    $out("\\tmodified:   styles.css"),
+  ),
+];
+
+TERMINAL_SCRIPTS["cherry-demo"] = [
+  $note("hotfix commit ab12cd3 was made on main; we want it on our release branch"),
+  $cmd("git switch release/v1.4",
+    $out("Switched to branch 'release/v1.4'", "success"),
+  ),
+  $cmd("git cherry-pick ab12cd3",
+    $out("[release/v1.4 7d6e5f4] Fix CSRF bug in form submission", "success"),
+    $out(" Date: Mon May 12 09:14:00 2026 +0000"),
+    $out(" 1 file changed, 3 insertions(+), 1 deletion(-)"),
+  ),
+];
+
+L("releases", "Advanced", "Tags and releases", "5 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>Once a project is being used by anyone — customers, teammates, the public — you'll want a way to say "this exact commit is version 1.0." That's what <strong>tags</strong> and <strong>releases</strong> are for.</p>
+
+    <h2>Tags: a name attached to a commit</h2>
+    <p>A tag is a permanent label pointing at a specific commit. Unlike branches, tags don't move — they're frozen.</p>
+
+    ${term("tag-create")}
+
+    <p>The <code>v1.0.0</code> follows <strong>semantic versioning</strong> (semver): <code>MAJOR.MINOR.PATCH</code>.</p>
+    <ul>
+      <li><strong>MAJOR</strong> (1.x.x) — incompatible changes that break existing usage.</li>
+      <li><strong>MINOR</strong> (x.1.x) — new features, backwards compatible.</li>
+      <li><strong>PATCH</strong> (x.x.1) — bug fixes only.</li>
+    </ul>
+
+    <p>So <code>v1.4.2</code> is the project's 1st major version, with 4 minor releases on it, and 2 patches on top of the most recent minor.</p>
+
+    <h2>Releases: tags with notes</h2>
+    <p>A <strong>release</strong> on GitHub is a tag plus a written description plus (optionally) downloadable files. Releases live under the <strong>Releases</strong> link on the right side of a repo's main page.</p>
+
+    <div class="gh-mock">
+      <div class="gh-mock-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
+        Releases — my-landing-site
+      </div>
+      <div class="gh-mock-body" style="padding: 14px 16px;">
+        <div style="padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <span class="badge feat">Latest</span>
+            <strong style="color: var(--text);">v1.4.0 — Contact form &amp; dark mode</strong>
+          </div>
+          <div style="color: var(--text-3); font-size: 12px;">released 2 days ago by USERNAME</div>
+          <div style="margin-top: 10px; color: #c8c8d2;">
+            <strong style="color: var(--text);">What's new</strong>
+            <ul style="margin: 6px 0 0; padding-left: 18px;">
+              <li>Added contact form to the homepage (#42)</li>
+              <li>Added dark mode toggle (#36)</li>
+              <li>Fixed pricing page mobile layout (#39)</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <strong style="color: var(--text);">v1.3.2</strong>
+          <span style="color: var(--text-3); font-size: 12px; margin-left: 10px;">released 3 weeks ago</span>
+        </div>
+      </div>
+    </div>
+
+    <h2>Creating a release</h2>
+    <p>From the repo, click <strong>Releases → Draft a new release</strong>. Pick the tag (or create a new one inline), write the notes (GitHub has a <em>Generate release notes</em> button that summarizes PRs since the last tag), and publish.</p>
+
+    <p>You can attach files to releases too — useful for distributing installable artifacts, packaged downloads, or anything someone might want to grab directly.</p>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8V18h6v-1.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg>
+        Tags + Actions = automatic deploys
+      </div>
+      <div class="callout-body">
+        <p>A common pattern: configure a GitHub Action to trigger on <code>on: push: tags: ['v*']</code>. Now pushing a tag like <code>v1.4.1</code> automatically kicks off a build, deploys to production, and publishes a release. One command, full release cycle.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>A <strong>tag</strong> is a permanent name pointing at a specific commit. Don't move.</li>
+        <li><strong>Semver</strong> (MAJOR.MINOR.PATCH) is the universal convention for version numbers.</li>
+        <li>A <strong>release</strong> on GitHub is a tag plus written notes plus optional downloadable files.</li>
+        <li>Tagging is often automated with a GitHub Action — push a tag, get a full deploy + release.</li>
+      </ul>
+    </div>
+  `);
+});
+
+TERMINAL_SCRIPTS["tag-create"] = [
+  $note("create an annotated tag for a release"),
+  $cmd('git tag -a v1.0.0 -m "First public release"'),
+  $cmd("git push origin v1.0.0",
+    $out("To github.com:OWNER/my-landing-site.git", "muted"),
+    $out(" * [new tag]         v1.0.0 -> v1.0.0", "success"),
+  ),
+  $cmd("git tag --list",
+    $out("v0.9.0"),
+    $out("v1.0.0", "bold"),
+  ),
+];
+
+TERMINAL_SCRIPTS["dns-check"] = [
+  $note("verify your DNS is pointing at GitHub Pages"),
+  $cmd("dig +short docs.my-landing-site.com",
+    $out("yourname.github.io.", "success"),
+  ),
+  $cmd("dig +short my-landing-site.com",
+    $out("185.199.108.153", "success"),
+    $out("185.199.109.153", "success"),
+    $out("185.199.110.153", "success"),
+    $out("185.199.111.153", "success"),
+  ),
+  $note("all four IPs above are GitHub Pages — apex domains are A-record'd to those"),
+];
+
+L("pages-basics", "Advanced", "GitHub Pages: free hosting for static sites", "5 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p><strong>GitHub Pages</strong> turns any repo into a public website. Drop in some HTML, flip a switch in Settings, and you have a live URL within a minute. No server, no hosting bill, no FTP. It's built right into the platform you're already using.</p>
+
+    <div class="callout info">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Meta moment
+      </div>
+      <div class="callout-body">
+        <p>The walkthrough you're reading right now is hosted on GitHub Pages. The exact same Git workflow you've just learned — commit, push, done — is how this page got published.</p>
+      </div>
+    </div>
+
+    <h2>The three flavours</h2>
+    <p>Pages comes in three shapes. They behave identically, only the URL pattern changes:</p>
+    <ul>
+      <li><strong>User site</strong> — a repo named <code>&lt;your-github-username&gt;.github.io</code> serves at <code>https://&lt;username&gt;.github.io</code>. One per account. Use this for your personal/company homepage.</li>
+      <li><strong>Project site</strong> — any other repo, with Pages turned on, serves at <code>https://&lt;username&gt;.github.io/&lt;repo-name&gt;</code>. Use this for docs, demos, or per-project sites.</li>
+      <li><strong>Organisation site</strong> — same as User site but owned by a GitHub org. Repo name is <code>&lt;org-name&gt;.github.io</code>.</li>
+    </ul>
+
+    <h2>Turning it on</h2>
+    <p>Pages is configured per-repo. From any repo:</p>
+    <ol>
+      <li>Go to <strong>Settings</strong> (the gear-icon tab at the top of the repo).</li>
+      <li>In the left sidebar, click <strong>Pages</strong>.</li>
+      <li>Under <em>Source</em>, choose <strong>Deploy from a branch</strong>.</li>
+      <li>Pick the branch (usually <code>main</code>) and the folder (<code>/ (root)</code> for most cases, <code>/docs</code> if you keep site files in a subfolder).</li>
+      <li>Click <strong>Save</strong>.</li>
+    </ol>
+
+    <p>GitHub then builds and publishes the site. Refresh the Pages settings page after 30 seconds or so and you'll see a green banner with the live URL.</p>
+
+    <h2>The mental model</h2>
+    <div class="gh-mock">
+      <div class="gh-mock-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Settings → Pages — my-landing-site
+      </div>
+      <div class="gh-mock-body">
+        <p style="margin:0 0 8px;"><strong>Your site is live at</strong></p>
+        <p style="margin:0 0 14px;"><code>https://my-landing-site.com/</code></p>
+        <p style="margin:0 0 6px; color: var(--text-2); font-size: 12px;">Source: Deploy from a branch — <code>main</code> / <code>/ (root)</code></p>
+        <p style="margin:0; color: var(--text-2); font-size: 12px;">Last deployed: 2 minutes ago</p>
+      </div>
+    </div>
+
+    <h2>What it actually serves</h2>
+    <p>Pages is a <strong>static</strong> host — it serves whatever HTML, CSS, JS, images and assets are in your repo, exactly as-is. There's no database, no backend code, no PHP or Python running on the server. Anything that can be done with files (a landing page, a portfolio, a tutorial, a single-page app, even something interactive like a calculator) works.</p>
+
+    <p>The file at the root, named <code>index.html</code>, is what's served when someone visits <code>/</code>. After that, paths map straight to files — visiting <code>/tutorials/github-zero-to-hero.html</code> serves the file at that path in the repo. Folders containing an <code>index.html</code> get served when you hit the folder URL with a trailing slash.</p>
+
+    <h2>Jekyll, or not</h2>
+    <p>By default Pages runs your files through <strong>Jekyll</strong>, a static-site generator that supports Markdown, layouts, and templating. If you only have plain HTML, Jekyll just passes the files through untouched — you can ignore it entirely. If you want Jekyll's features (writing posts in Markdown, sharing a header/footer across pages), drop a <code>_config.yml</code> at the root and start using its conventions.</p>
+
+    <p>To opt out of Jekyll entirely (sometimes useful if filenames starting with <code>_</code> are being skipped), add an empty file called <code>.nojekyll</code> at the repo root. Done.</p>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8V18h6v-1.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg>
+        It's just files
+      </div>
+      <div class="callout-body">
+        <p>The fastest way to understand Pages is to remember: it's a folder of files on the internet. Every push updates the folder. Every URL maps to a file. That's the whole thing.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>Pages = free static hosting tied to a GitHub repo.</li>
+        <li>Three flavours: User site (one per account), Project site (per-repo), Org site (one per org).</li>
+        <li>Turn it on under Settings → Pages, pick a branch, save.</li>
+        <li>It serves files exactly as they are — plain HTML works, Jekyll is optional.</li>
+        <li><code>index.html</code> is the home page; URL paths map to file paths.</li>
+      </ul>
+    </div>
+  `);
+});
+
+L("custom-domain", "Advanced", "Custom domains and HTTPS", "7 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>By default a Pages site lives at <code>&lt;username&gt;.github.io/&lt;repo&gt;</code>. That works, but for anything you'll share publicly — a company site, a portfolio, a tutorial you send to clients — you want a real domain. Pages supports <strong>custom domains</strong> with free HTTPS, and the setup takes about 10 minutes the first time.</p>
+
+    <h2>The two flavours: apex and subdomain</h2>
+    <p>There are two kinds of domain you might point at Pages:</p>
+    <ul>
+      <li><strong>Apex domain</strong> — the bare domain itself, like <code>my-landing-site.com</code>. Sometimes called the "root" or "naked" domain.</li>
+      <li><strong>Subdomain</strong> — anything in front of the apex, like <code>www.my-landing-site.com</code>, <code>learn.my-landing-site.com</code>, or <code>docs.my-landing-site.com</code>.</li>
+    </ul>
+    <p>Both work. Subdomains are slightly simpler to set up (a single CNAME record), apex domains need a different DNS record type (A records). The end-user experience is identical.</p>
+
+    <h2>Step 1 — Tell GitHub the domain</h2>
+    <p>In your repo: <strong>Settings → Pages → Custom domain</strong>. Type the domain you want (e.g. <code>my-landing-site.com</code> or <code>learn.my-landing-site.com</code>) and save. GitHub automatically creates a file called <code>CNAME</code> at the root of your repo containing that domain name. That file is how Pages knows which domain to serve when a request arrives.</p>
+
+    <div class="callout info">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        The CNAME file is just text
+      </div>
+      <div class="callout-body">
+        <p>If you ever need to change it, edit the file directly in the repo. One line, the domain name, no quotes, no protocol. It's just a marker telling Pages "this repo answers to this domain."</p>
+      </div>
+    </div>
+
+    <h2>Step 2 — Configure DNS at your registrar</h2>
+    <p>Your registrar (GoDaddy, Cloudflare, Namecheap, etc.) is where you bought the domain. That's where you control the DNS records that tell the internet which server to go to when someone types your domain in the browser.</p>
+
+    <p>Open your registrar's DNS panel. The exact UI varies, but every registrar lets you add records of various types. You need different records depending on whether you're pointing an apex or a subdomain:</p>
+
+    <h3>For a subdomain (<code>learn.my-landing-site.com</code>)</h3>
+    <p>Add one <strong>CNAME record</strong>:</p>
+    <ul>
+      <li><strong>Type:</strong> CNAME</li>
+      <li><strong>Name / Host:</strong> <code>learn</code> (just the subdomain part, not the whole thing)</li>
+      <li><strong>Value / Target:</strong> <code>&lt;your-github-username&gt;.github.io</code> (no <code>https://</code>, no trailing slash)</li>
+      <li><strong>TTL:</strong> leave at default (1 hour is fine)</li>
+    </ul>
+
+    <h3>For an apex domain (<code>my-landing-site.com</code>)</h3>
+    <p>You can't use a CNAME for the apex (DNS standards disallow it). Instead, add four <strong>A records</strong>, all with the same name (the apex itself, often shown as <code>@</code> or blank), pointing at GitHub's four Pages IP addresses:</p>
+    <ul>
+      <li><code>185.199.108.153</code></li>
+      <li><code>185.199.109.153</code></li>
+      <li><code>185.199.110.153</code></li>
+      <li><code>185.199.111.153</code></li>
+    </ul>
+    <p>These are GitHub's published IPs for Pages. They've been stable for years; they're documented in the official Pages docs.</p>
+
+    <h2>Step 3 — Wait for DNS to propagate</h2>
+    <p>DNS changes are not instant. After saving the records, the internet takes anywhere from a couple of minutes to (rarely) a few hours to start using them. You can check whether your changes are live with the <code>dig</code> command:</p>
+
+    ${term("dns-check")}
+
+    <p>If <code>dig</code> still shows old values, wait and try again. Don't keep changing records — that just resets the clock.</p>
+
+    <h2>Step 4 — Turn on HTTPS</h2>
+    <p>Once DNS resolves correctly, go back to <strong>Settings → Pages</strong>. After a minute or two, the <strong>Enforce HTTPS</strong> checkbox becomes clickable. Tick it. GitHub provisions a free TLS certificate via Let's Encrypt and renews it automatically forever. Your site is now served at <code>https://</code> with the green padlock.</p>
+
+    <div class="callout warn">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Common gotchas
+      </div>
+      <div class="callout-body">
+        <p><strong>Mixing apex and www:</strong> you'll want both <code>my-landing-site.com</code> and <code>www.my-landing-site.com</code> to work. Set the apex as your Pages custom domain (A records), and add a CNAME record for <code>www</code> pointing at <code>&lt;username&gt;.github.io</code>. GitHub will redirect <code>www</code> to the apex automatically.</p>
+        <p><strong>Leftover GoDaddy parking page:</strong> when you first buy a domain, GoDaddy sometimes pre-fills DNS records that point at their own parking server. Delete those before adding GitHub's records, otherwise you'll get redirected to a "Your domain is parked" page.</p>
+        <p><strong>HTTPS checkbox greyed out:</strong> it stays disabled until DNS fully resolves to GitHub. Wait an hour, refresh, try again. If it's still greyed out after 24 hours, run <code>dig</code> — DNS isn't right yet.</p>
+      </div>
+    </div>
+
+    <h2>Picking a domain pattern</h2>
+    <p>For most cases, the cleanest setup is:</p>
+    <ul>
+      <li><strong>Apex</strong> (<code>my-landing-site.com</code>) for the main marketing site.</li>
+      <li><strong>Subdomain</strong> for everything else: <code>docs.</code>, <code>app.</code>, <code>learn.</code>, <code>blog.</code>. Each can point at a different repo on GitHub Pages — or to entirely different hosts.</li>
+    </ul>
+    <p>This makes each project independently deployable. Updating <code>docs.</code> never touches the marketing site, and vice versa.</p>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>Pages supports custom domains with free auto-renewing HTTPS.</li>
+        <li>Apex domains need four A records pointing at GitHub's IPs. Subdomains use a single CNAME record.</li>
+        <li>The repo's <code>CNAME</code> file tells Pages which domain to answer to.</li>
+        <li>DNS changes take minutes to hours. Use <code>dig</code> to verify.</li>
+        <li>Tick "Enforce HTTPS" once DNS resolves — it's free and automatic.</li>
+      </ul>
+    </div>
+  `);
+});
+
+L("pages-actions", "Advanced", "Deploy automatically with Actions", "5 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>The basic Pages flow ("Deploy from a branch") works perfectly when your repo already contains the files you want served — plain HTML, an exported static site, a folder of Markdown. But sometimes the files you commit aren't the files you want to serve: maybe you write in Astro, Hugo, Next.js, or any framework that needs a <em>build</em> step to turn source code into static HTML. That's where <strong>GitHub Actions</strong> takes over the deploy.</p>
+
+    <h2>The two modes of Pages</h2>
+    <p>In Settings → Pages → Source there are two options:</p>
+    <ul>
+      <li><strong>Deploy from a branch</strong> — the simple mode. GitHub copies whatever's in the chosen branch and folder, no transformation. Best when your repo already contains the final HTML.</li>
+      <li><strong>GitHub Actions</strong> — the flexible mode. You write a workflow that builds the site (running <code>npm run build</code>, <code>hugo</code>, whatever your tool needs) and uploads the result. Pages serves whatever the workflow uploads.</li>
+    </ul>
+
+    <h2>A minimal deploy workflow</h2>
+    <p>This is what a static-site deploy workflow looks like. Drop it at <code>.github/workflows/deploy.yml</code>:</p>
+
+    <div class="terminal" style="margin-bottom:18px;">
+      <div class="terminal-head">
+        <div class="terminal-dots"><span></span><span></span><span></span></div>
+        <div class="terminal-title">.github/workflows/deploy.yml</div>
+      </div>
+      <div class="terminal-body">
+<span class="term-out hunk">name:</span><span class="term-out"> Deploy to Pages</span>
+<span class="term-out hunk">on:</span>
+<span class="term-out">  push:</span>
+<span class="term-out">    branches: [main]</span>
+<span class="term-out">  workflow_dispatch:</span>
+
+<span class="term-out hunk">permissions:</span>
+<span class="term-out">  contents: read</span>
+<span class="term-out">  pages: write</span>
+<span class="term-out">  id-token: write</span>
+
+<span class="term-out hunk">jobs:</span>
+<span class="term-out">  build:</span>
+<span class="term-out">    runs-on: ubuntu-latest</span>
+<span class="term-out">    steps:</span>
+<span class="term-out">      - uses: actions/checkout@v4</span>
+<span class="term-out">      - uses: actions/setup-node@v4</span>
+<span class="term-out">        with: { node-version: 20 }</span>
+<span class="term-out">      - run: npm ci</span>
+<span class="term-out">      - run: npm run build</span>
+<span class="term-out">      - uses: actions/upload-pages-artifact@v3</span>
+<span class="term-out">        with: { path: ./dist }</span>
+
+<span class="term-out">  deploy:</span>
+<span class="term-out">    needs: build</span>
+<span class="term-out">    runs-on: ubuntu-latest</span>
+<span class="term-out">    environment:</span>
+<span class="term-out">      name: github-pages</span>
+<span class="term-out">      url: \${{ steps.deployment.outputs.page_url }}</span>
+<span class="term-out">    steps:</span>
+<span class="term-out">      - id: deployment</span>
+<span class="term-out">        uses: actions/deploy-pages@v4</span>
+      </div>
+    </div>
+
+    <p>Reading that:</p>
+    <ul>
+      <li><strong>The build job</strong> checks out the code, installs Node, runs <code>npm run build</code>, and uploads the output folder (<code>./dist</code> — change to wherever your build tool writes its output) as a Pages artifact.</li>
+      <li><strong>The deploy job</strong> waits for the build to finish, then uses GitHub's official <code>deploy-pages</code> action to publish the artifact to Pages.</li>
+      <li><strong>Permissions</strong> let the workflow write to Pages and get a signing token — these are required.</li>
+    </ul>
+
+    <p>Switch Settings → Pages → Source to <strong>GitHub Actions</strong>, commit the workflow, push. From now on every push to <code>main</code> rebuilds and republishes the site. The Actions tab shows each run.</p>
+
+    <h2>When to bother with this</h2>
+    <p>Stay on the simple "Deploy from a branch" mode unless one of these applies:</p>
+    <ul>
+      <li>You use a framework that needs to compile (React, Vue, Astro, Next.js static export, Hugo, Eleventy, Jekyll with custom plugins).</li>
+      <li>You want pre-deploy steps: linting, minification, image optimisation, fetching external data.</li>
+      <li>You want to deploy from a branch other than <code>main</code> (e.g. only on tagged releases).</li>
+    </ul>
+
+    <p>For plain HTML — like this tutorial — the basic branch deploy is more than enough. No workflow needed.</p>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8V18h6v-1.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg>
+        Don't reinvent the wheel
+      </div>
+      <div class="callout-body">
+        <p>Most frameworks (Astro, Next.js, SvelteKit, Hugo) publish an official "deploy to GitHub Pages" template you can copy verbatim. Check the framework's docs before hand-rolling a workflow — you'll save an hour of trial and error.</p>
+      </div>
+    </div>
+
+    <div class="takeaways">
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>Pages has two modes: deploy-from-branch (simple, file-as-is) and GitHub Actions (flexible, runs a build).</li>
+        <li>Use the Actions mode when you need a build step — frameworks, transpilation, asset processing.</li>
+        <li>The official <code>actions/upload-pages-artifact</code> + <code>actions/deploy-pages</code> pair handles the heavy lifting.</li>
+        <li>Switch the Source dropdown to "GitHub Actions" or the workflow won't be allowed to publish.</li>
+        <li>Frameworks usually publish a ready-made deploy workflow — copy theirs.</li>
+      </ul>
+    </div>
+  `);
+});
+
+
+L("wrap-up", "Advanced", "Where to go from here", "3 min", (host) => {
+  host.insertAdjacentHTML("beforeend", `
+    <p>That's the tour. You now have a working mental model of Git and a complete picture of how GitHub fits around it. The commands and concepts in this walkthrough cover what you'll see day-to-day on any modern software team.</p>
+
+    <h2>The minimum you'll use</h2>
+    <p>If you only ever remember six commands, these are the six:</p>
+    <ul>
+      <li><code>git clone &lt;url&gt;</code> — get a copy of a repo</li>
+      <li><code>git status</code> — what's changed?</li>
+      <li><code>git add &lt;file&gt;</code> + <code>git commit -m "msg"</code> — save a checkpoint</li>
+      <li><code>git push</code> — upload to GitHub</li>
+      <li><code>git pull</code> — get the latest from GitHub</li>
+      <li><code>git switch &lt;branch&gt;</code> — change which branch you're on</li>
+    </ul>
+
+    <h2>The GitHub Habits</h2>
+    <ul>
+      <li><strong>Pull before you start.</strong> Push before you stop.</li>
+      <li><strong>One branch per task.</strong> Merge through a Pull Request.</li>
+      <li><strong>Small commits, clear messages.</strong> Your future self will thank you.</li>
+      <li><strong>Read PRs.</strong> Even when you're not the developer, the Files changed tab tells you what's about to ship.</li>
+      <li><strong>Protect main.</strong> Branch protection rules are five minutes of setup that prevent days of mess.</li>
+    </ul>
+
+    <h2>If you get stuck</h2>
+    <p>Three places to look, in order:</p>
+    <ol>
+      <li><code>git status</code> — Git is unusually good at telling you what state you're in and what to do next.</li>
+      <li><a href="https://docs.github.com">docs.github.com</a> — official docs, well-organized, searchable.</li>
+      <li><a href="https://ohshitgit.com">ohshitgit.com</a> — a wonderful page of "I messed up, how do I fix it?" recipes.</li>
+    </ol>
+
+    <div class="callout tip">
+      <div class="callout-head">
+        <svg class="ico" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        You've finished
+      </div>
+      <div class="callout-body">
+        <p>That's the whole course. Mark this lesson complete and the bar will hit 100%. Go open a repo — there's no substitute for actually doing it. Make a commit. Push it. Open a PR. You know enough to begin.</p>
+      </div>
+    </div>
+  `);
+});
+</script>
+
+<script>
+function renderSidebar() {
+  const nav = $("#nav");
+  nav.innerHTML = "";
+  const groupMap = {};
+  const order = [];
+  for (const l of LESSONS) {
+    if (!groupMap[l.group]) { groupMap[l.group] = []; order.push(l.group); }
+    groupMap[l.group].push(l);
+  }
+  for (const groupName of order) {
+    const items = groupMap[groupName];
+    const collapsed = state.collapsed.has(groupName);
+    const section = el("div", { class: "section" + (collapsed ? " collapsed" : "") });
+    const doneCount = items.filter(i => state.done.has(i.id)).length;
+    const head = el("div", { class: "section-head", onclick: () => {
+      if (state.collapsed.has(groupName)) state.collapsed.delete(groupName);
+      else state.collapsed.add(groupName);
+      localStorage.setItem("ght.collapsed", JSON.stringify(Array.from(state.collapsed)));
+      renderSidebar();
+    }});
+    head.appendChild(el("span", {}, groupName));
+    head.appendChild(el("span", { class: "section-count" }, `${doneCount}/${items.length}`));
+    section.appendChild(head);
+    const list = el("div", { class: "section-list" });
+    for (const item of items) {
+      const active = state.current === item.id;
+      const done = state.done.has(item.id);
+      const navItem = el("div", { class: "nav-item" + (active ? " active" : "") + (done ? " done" : ""),
+        onclick: () => goTo(item.id) });
+      navItem.appendChild(el("div", { class: "nav-check" }));
+      navItem.appendChild(el("div", { class: "nav-title" }, item.title));
+      list.appendChild(navItem);
+    }
+    section.appendChild(list);
+    nav.appendChild(section);
+  }
+  const pct = LESSONS.length ? Math.round((state.done.size / LESSONS.length) * 100) : 0;
+  $("#progress-pct").textContent = `${pct}%`;
+  $("#progress-fill").style.width = `${pct}%`;
+  const resetBtn = $("#reset-btn");
+  if (resetBtn) resetBtn.disabled = state.done.size === 0;
+}
+
+function renderCrumbs(lesson) {
+  const c = $("#crumbs");
+  c.innerHTML = "";
+  c.appendChild(el("span", {}, "GitHub Zero to Hero"));
+  c.appendChild(el("span", { class: "crumb-sep" }, "/"));
+  c.appendChild(el("span", {}, lesson.group));
+  c.appendChild(el("span", { class: "crumb-sep" }, "/"));
+  c.appendChild(el("span", { class: "crumb-current" }, lesson.title));
+}
+
+function renderLesson(id) {
+  const lesson = LESSONS.find(l => l.id === id);
+  if (!lesson) return;
+  state.current = id;
+  state.activeTerminal = null;
+  const host = $("#lesson");
+  host.innerHTML = "";
+  renderCrumbs(lesson);
+
+  host.appendChild(el("div", { class: "lesson-tag" }, lesson.group));
+  host.appendChild(el("h1", {}, lesson.title));
+  host.appendChild(el("div", { class: "lesson-meta" },
+    el("span", { class: "lesson-meta-item", html: '<svg class="ico ico-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + lesson.time }),
+    el("span", { class: "lesson-meta-item", html: '<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Lesson ' + (LESSONS.findIndex(l => l.id === id) + 1) + ' of ' + LESSONS.length })
+  ));
+
+  lesson.render(host);
+
+  const done = state.done.has(id);
+  const idx = LESSONS.findIndex(l => l.id === id);
+  const prev = idx > 0 ? LESSONS[idx - 1] : null;
+  const next = idx < LESSONS.length - 1 ? LESSONS[idx + 1] : null;
+  const completeBtn = el("button", { class: "complete-btn" + (done ? " done" : ""), onclick: () => {
+    const wasDone = state.done.has(id);
+    if (wasDone) state.done.delete(id);
+    else state.done.add(id);
+    localStorage.setItem("ght.done", JSON.stringify(Array.from(state.done)));
+    renderSidebar();
+    // Auto-advance to next lesson when marking complete (but stay put when un-marking or on last lesson)
+    if (!wasDone && next) { goTo(next.id); return; }
+    renderLesson(id);
+  }});
+  completeBtn.innerHTML = '<svg class="ico" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' + (done ? "Completed" : (next ? "Mark complete & continue →" : "Mark as complete"));
+  host.appendChild(completeBtn);
+  const foot = el("div", { class: "lesson-foot" });
+  const prevBtn = el("button", { class: "foot-btn", onclick: () => prev && goTo(prev.id) });
+  if (!prev) prevBtn.disabled = true;
+  prevBtn.innerHTML = '<div class="foot-dir">← Previous</div><div class="foot-title">' + (prev ? prev.title : "Start of course") + '</div>';
+  const nextBtn = el("button", { class: "foot-btn next", onclick: () => next && goTo(next.id) });
+  if (!next) nextBtn.disabled = true;
+  nextBtn.innerHTML = '<div class="foot-dir">Next →</div><div class="foot-title">' + (next ? next.title : "Course complete") + '</div>';
+  foot.appendChild(prevBtn);
+  foot.appendChild(nextBtn);
+  host.appendChild(foot);
+
+  $$(".term-host-mount", host).forEach(mount => {
+    const scriptName = mount.dataset.script;
+    const optsRaw = (mount.dataset.opts || "{}").replace(/&apos;/g, "'");
+    let opts = {};
+    try { opts = JSON.parse(optsRaw); } catch (e) { opts = {}; }
+    const script = TERMINAL_SCRIPTS[scriptName];
+    if (script) new Terminal(mount, script, opts);
+  });
+
+  renderSidebar();
+  try { $(".main").scrollTo({ top: 0, behavior: "smooth" }); } catch (e) { $(".main").scrollTop = 0; }
+  window.history.replaceState(null, "", "#" + id);
+}
+
+function goTo(id) {
+  renderLesson(id);
+  // Auto-close the mobile drawer after navigating
+  if (window.innerWidth <= 880) closeDrawer();
+}
+
+// ---- Mobile drawer ----
+function openDrawer() {
+  $(".sidebar").classList.add("open");
+  $("#scrim").classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+function closeDrawer() {
+  $(".sidebar").classList.remove("open");
+  $("#scrim").classList.remove("show");
+  document.body.style.overflow = "";
+}
+$("#sidebar-toggle").addEventListener("click", openDrawer);
+$("#scrim").addEventListener("click", closeDrawer);
+
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.isContentEditable) return;
+  if (e.key === "Escape") { closeDrawer(); return; }
+  if (e.key === " ") {
+    if (state.activeTerminal) { e.preventDefault(); state.activeTerminal.toggle(); }
+    return;
+  }
+  const k = e.key.toLowerCase();
+  const idx = LESSONS.findIndex(l => l.id === state.current);
+  if (k === "j") {
+    if (idx >= 0 && idx < LESSONS.length - 1) goTo(LESSONS[idx + 1].id);
+  } else if (k === "k") {
+    if (idx > 0) goTo(LESSONS[idx - 1].id);
+  }
+});
+
+// ---- OS picker ----
+function setOS(os) {
+  if (!OS_PROFILE[os]) return;
+  state.os = os;
+  localStorage.setItem("ght.os", os);
+  $$(".os-tab").forEach(t => t.classList.toggle("active", t.dataset.os === os));
+  if (state.current) renderLesson(state.current);
+}
+$$(".os-tab").forEach(t => {
+  t.addEventListener("click", () => setOS(t.dataset.os));
+  t.classList.toggle("active", t.dataset.os === state.os);
+});
+
+// ---- Reset progress ----
+$("#reset-btn").addEventListener("click", () => {
+  if (state.done.size === 0) return;
+  if (!confirm("Clear all completed lessons?")) return;
+  state.done.clear();
+  localStorage.setItem("ght.done", "[]");
+  renderSidebar();
+  if (state.current) renderLesson(state.current);
+});
+
+// ---- Hash routing ----
+window.addEventListener("hashchange", () => {
+  const id = window.location.hash.slice(1);
+  if (id && LESSONS.find(l => l.id === id) && id !== state.current) {
+    renderLesson(id);
+  }
+});
+
+// ---- Boot ----
+(function init() {
+  const hash = window.location.hash.slice(1);
+  const initialId = (hash && LESSONS.find(l => l.id === hash)) ? hash : LESSONS[0].id;
+  renderLesson(initialId);
+})();
+</script>
+
+</body>
+</html>
